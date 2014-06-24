@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, SimpleManagerActivity!</string>
+    <string name="app_name">AppManager</string>
+    <string name="count">已选中0项</string>
+    <string name="selectall">全选</string>
+    <string name="abselect">反选</string>
+    <string name="kill">kill</string>
+    <string name="install_text">安装插件可以使应用不会被系统杀死</string>
+    <string name="install">install</string>
+    <string name="uninstall">uninstall</string>
+    <string name="action_help">help</string>
+    <string name="action_about">about</string>
+    <string name="action_settings">setting</string>
+    <string name="action_feedback">feedback</string>
+    <string name="action_help_msg">simple app for force stop apps</string>
+    <string name="action_about_msg">simple app for force stop apps</string>
+    <string name="except">the selected item wil not showing</string>
+
+</resources>

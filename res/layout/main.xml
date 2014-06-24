@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <ListView
+        android:id="@+id/app_list"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.0"
+        android:animationCache="true"
+        android:divider="@android:color/black"
+        android:fadingEdge="none"
+        android:fastScrollEnabled="true"
+        android:layoutAnimation="@anim/animationlayout"
+        android:scrollbarStyle="outsideInset"
+        android:scrollingCache="false" />
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="100dp" 
+        android:background="@android:color/black">
+
+        <Button
+            android:id="@+id/kill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:background="@layout/button_bg"
+            android:text="@string/kill" 
+            android:layout_gravity="center"/>
+
+        <ProgressBar
+            android:id="@+id/pb"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:visibility="invisible"/>
+    </FrameLayout>
+
+</LinearLayout>

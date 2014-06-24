@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item"
+    android:layout_width="fill_parent"
+    android:layout_height="55dip"
+    android:layout_marginTop="20dip"
+    android:gravity="center_vertical"
+    android:orientation="horizontal" >
+
+    <!--
+    在main.xml中增加ImageView控件时如果没有加android:contentDescription="@string/app_name"
+    时会引起Missing contentDescription attribute on image ，
+    主要是因为在main.xml中没有使用TextView之类的文本控件，ADT会提示给像ImageView增加一个说明，
+    这里添加android:contentDescription="@string/app_name即可，其实加不加影响不大。
+    只是在IDE中会显示一个黄色下划线，不美观。
+    -->
+
+    <ImageView
+        android:id="@+id/app_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/app_name"
+        android:gravity="center_vertical"
+        android:src="@drawable/ic_launcher" />
+
+    <TextView
+        android:id="@+id/app_name"
+        android:layout_width="200dp"
+        android:layout_height="fill_parent"
+        android:layout_centerInParent="true"
+        android:gravity="center" />
+
+    <CheckBox
+        android:id="@+id/app_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dip"
+        android:clickable="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false" />
+
+</RelativeLayout>

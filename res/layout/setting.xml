@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <ListView
+        android:id="@+id/setting_list"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.0"
+        android:animationCache="true"
+        android:divider="@android:color/black"
+        android:fadingEdge="none"
+        android:fastScrollEnabled="true"
+        android:layoutAnimation="@anim/animationlayout"
+        android:scrollbarStyle="outsideInset"
+        android:scrollingCache="false" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:gravity="center"
+        android:text="@string/install_text" />
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:background="@android:color/black" >
+
+        <Button
+            android:id="@+id/install"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:background="@layout/button_bg"
+            android:onClick="onClick"
+            android:layout_marginLeft="30dp"
+            android:text="@string/install" />
+
+        <Button
+            android:id="@+id/uninstall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"
+            android:background="@layout/button_bg"
+            android:layout_marginRight="30dp"
+            android:onClick="onClick"
+            android:text="@string/uninstall" />
+    </FrameLayout>
+
+</LinearLayout>
