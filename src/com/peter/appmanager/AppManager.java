@@ -56,7 +56,9 @@ public class AppManager extends Application {
 			ArrayList<ApplicationInfo> infos = getAppInfo(runningAppInfo.pkgList, appList);
 			String topPackage = getTopApplication(context);
 			for(ApplicationInfo applicationInfo: infos) {
-				if(applicationInfo != null && !isSystemApp(applicationInfo) && !applicationInfo.packageName.equals(topPackage)) {
+				if(applicationInfo != null && !isSystemApp(applicationInfo) 
+						&& !applicationInfo.packageName.equals(topPackage)
+						&& !applicationInfo.packageName.equals(MyService.TARGET_PACKAGE_NAME)) {
 					AppInfo info = new AppInfo();
 					info.packageName = applicationInfo.packageName;
 					BitmapDrawable bitmapDrawable = (BitmapDrawable) applicationInfo.loadIcon(pm);
@@ -81,10 +83,10 @@ public class AppManager extends Application {
 	}
 	
 
-/**
+	/**
      *判断当前应用程序处于前台还是后台
      */
-    public static String getTopApplication(final Context context) {
+	public static String getTopApplication(final Context context) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningTaskInfo> tasks = am.getRunningTasks(1);
         if (!tasks.isEmpty()) {
@@ -92,7 +94,18 @@ public class AppManager extends Application {
             return topActivity.getPackageName();
         }
         return "";  
-     }
+	}
+    
+    public boolean havePackage(String packageName) {
+    	PackageManager pm = getPackageManager();
+		List<ApplicationInfo> appList = pm.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
+		for(ApplicationInfo info : appList) {
+			if(info.packageName.equals(packageName)) {
+				return true;
+			}
+		}
+		return false;
+    }
 	
 	private Drawable getRightSizeIcon(BitmapDrawable drawable) {
 		Drawable rightDrawable = getResources().getDrawable(R.drawable.session_manager);

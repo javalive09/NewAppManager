@@ -91,32 +91,16 @@ public class MyService extends Service {
 
 	Handler mHandler = new Handler(Looper.getMainLooper()) {
 		public void handleMessage(Message msg) {
-			boolean serviceRunning = serviceRunning(MyService.this,TARGET_PACKAGE_NAME);
-			Log.i("peter", "serviceRunning=" + serviceRunning);
-			if (serviceRunning) {
-				stopService(new Intent(TARGET_ACTION));
-			}else {
+			AppManager application = (AppManager) getApplication();
+			boolean havePlug = application.havePackage(TARGET_ACTION);
+			Log.i("peter", "havePlug=" + havePlug);
+			if (!havePlug) {
 				Toast.makeText(MyService.this, "plug not Running", Toast.LENGTH_SHORT).show();
 				startService(new Intent(TARGET_ACTION));
 				sendEmptyMessageDelayed(0, 5000);
 			}
 		};
 	};
-
-	private boolean serviceRunning(Context context, String packagename) {
-		if (packagename == null || "".equals(packagename)) {
-			return false;
-		}
-		ActivityManager manager = (ActivityManager) context
-				.getSystemService(Context.ACTIVITY_SERVICE);
-		for (RunningServiceInfo service : manager
-				.getRunningServices(Integer.MAX_VALUE)) {
-			if (packagename.equals(service.service.getPackageName())) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	private long getTotalMemory() {
 		String str1 = "/proc/meminfo";// 系统内存信息文件
