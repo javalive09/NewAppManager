@@ -1,11 +1,8 @@
 package com.peter.appmanager;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import com.peter.appmanager.AppAdapter.AppInfo;
@@ -18,11 +15,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 public class MyService extends Service {
@@ -32,14 +29,7 @@ public class MyService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		return new MyBinder();
-	}
-
-	public class MyBinder extends Binder {
-
-		public MyService getService() {
-			return MyService.this;
-		}
+		return null;
 	}
 
 	private void kill() {
@@ -66,14 +56,13 @@ public class MyService extends Service {
 
 	@Override
 	public void onCreate() {
-		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT)
-				.show();
+		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
 		mHandler.sendEmptyMessageDelayed(0, 5000);
 
-		final IntentFilter filter = new IntentFilter();
+		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
-
 		registerReceiver(screenOffReceiver, filter);
+		
 	}
 
 	final BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
@@ -88,28 +77,26 @@ public class MyService extends Service {
 				if(rate < 0.3) {
 					kill();
 				}
-								
 			}
-
 		}
 	};
 
 	@Override
 	public void onDestroy() {
-		Toast.makeText(this, "Manager Service onDestroy()", Toast.LENGTH_SHORT)
-				.show();
+		Toast.makeText(this, "Manager Service onDestroy()", Toast.LENGTH_SHORT).show();
+		unregisterReceiver(screenOffReceiver);
 		Intent intent = new Intent(getApplicationContext(), MyService.class);
 		startService(intent);
-		unregisterReceiver(screenOffReceiver);
 	}
 
 	Handler mHandler = new Handler(Looper.getMainLooper()) {
 		public void handleMessage(Message msg) {
-			boolean serviceRunning = serviceRunning(MyService.this,
-					TARGET_PACKAGE_NAME);
-			if (!serviceRunning) {
-				Toast.makeText(MyService.this, "plug not Running",
-						Toast.LENGTH_SHORT).show();
+			boolean serviceRunning = serviceRunning(MyService.this,TARGET_PACKAGE_NAME);
+			Log.i("peter", "serviceRunning=" + serviceRunning);
+			if (serviceRunning) {
+				stopService(new Intent(TARGET_ACTION));
+			}else {
+				Toast.makeText(MyService.this, "plug not Running", Toast.LENGTH_SHORT).show();
 				startService(new Intent(TARGET_ACTION));
 				sendEmptyMessageDelayed(0, 5000);
 			}
@@ -125,7 +112,6 @@ public class MyService extends Service {
 		for (RunningServiceInfo service : manager
 				.getRunningServices(Integer.MAX_VALUE)) {
 			if (packagename.equals(service.service.getPackageName())) {
-
 				return true;
 			}
 		}

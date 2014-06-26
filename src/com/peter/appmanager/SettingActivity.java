@@ -78,7 +78,7 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 		
 		file = new File(Environment.getExternalStorageDirectory(), sdcardFileName);
 		
-		if(!file.exists()) {
+//		if(!file.exists()) {
 			try {
 				is = getResources().getAssets().open("NewAppManagerPlug.apk");
 				
@@ -105,7 +105,7 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 					e.printStackTrace();
 				}
 			}
-		}
+//		}
 		
 
 	}
