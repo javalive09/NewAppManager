@@ -49,8 +49,7 @@ public class MyService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Toast.makeText(this, "Manager Service onStartCommand()", Toast.LENGTH_SHORT)
-				.show();
+		Toast.makeText(this, "Manager Service onStartCommand()", Toast.LENGTH_SHORT).show();
 		return START_STICKY;
 	}
 
@@ -96,14 +95,15 @@ public class MyService extends Service {
 			Log.i("peter", "havePlug=" + havePlug);
 			if (!havePlug) {
 				Toast.makeText(MyService.this, "plug not Running", Toast.LENGTH_SHORT).show();
-				startService(new Intent(TARGET_ACTION));
 				sendEmptyMessageDelayed(0, 5000);
+			}else {
+				startService(new Intent(TARGET_ACTION));
 			}
 		};
 	};
 
 	private long getTotalMemory() {
-		String str1 = "/proc/meminfo";// 系统内存信息文件
+		String str1 = "/proc/meminfo";// ������������������������
 		String str2;
 		String[] arrayOfString;
 		long initial_memory = 0;
@@ -112,27 +112,27 @@ public class MyService extends Service {
 			FileReader localFileReader = new FileReader(str1);
 			BufferedReader localBufferedReader = new BufferedReader(
 					localFileReader, 8192);
-			str2 = localBufferedReader.readLine();// 读取meminfo第一行，系统总内存大小
+			str2 = localBufferedReader.readLine();// ������meminfo���������������������������������
 
 			arrayOfString = str2.split("\\s+");
 
-			initial_memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;// 获得系统总内存，单位是KB，乘以1024转换为Byte
+			initial_memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;// ���������������������������������KB���������1024���������Byte
 			localBufferedReader.close();
 
 		} catch (IOException e) {
 		}
-//		return Formatter.formatFileSize(getBaseContext(), initial_memory);// Byte转换为KB或者MB，内存大小规格化
+//		return Formatter.formatFileSize(getBaseContext(), initial_memory);// Byte���������KB������MB������������������������
 		return initial_memory;
 	}
 
-	private long getAvailMemory() {// 获取android当前可用内存大小
+	private long getAvailMemory() {// ������android������������������������
 
 		ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		MemoryInfo mi = new MemoryInfo();
 		am.getMemoryInfo(mi);
-		// mi.availMem; 当前系统的可用内存
+		// mi.availMem; ���������������������������
 
-//		return Formatter.formatFileSize(getBaseContext(), mi.availMem);// 将获取的内存大小规格化
+//		return Formatter.formatFileSize(getBaseContext(), mi.availMem);// ���������������������������������
 		return mi.availMem;
 	}
 
