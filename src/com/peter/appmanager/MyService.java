@@ -9,7 +9,6 @@ import com.peter.appmanager.AppAdapter.AppInfo;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -45,6 +44,7 @@ public class MyService extends Service {
 		}
 		application.commandLineKillAll();
 		Toast.makeText(this, "Manager Service invoke kill()!!", Toast.LENGTH_SHORT).show();
+		
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class MyService extends Service {
 	};
 
 	private long getTotalMemory() {
-		String str1 = "/proc/meminfo";// ������������������������
+		String str1 = "/proc/meminfo";
 		String str2;
 		String[] arrayOfString;
 		long initial_memory = 0;
@@ -112,28 +112,30 @@ public class MyService extends Service {
 			FileReader localFileReader = new FileReader(str1);
 			BufferedReader localBufferedReader = new BufferedReader(
 					localFileReader, 8192);
-			str2 = localBufferedReader.readLine();// ������meminfo���������������������������������
+			str2 = localBufferedReader.readLine();
 
 			arrayOfString = str2.split("\\s+");
 
-			initial_memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;// ���������������������������������KB���������1024���������Byte
+			initial_memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;
 			localBufferedReader.close();
 
 		} catch (IOException e) {
 		}
-//		return Formatter.formatFileSize(getBaseContext(), initial_memory);// Byte���������KB������MB������������������������
+//		return Formatter.formatFileSize(getBaseContext(), initial_memory);// 
 		return initial_memory;
 	}
 
-	private long getAvailMemory() {// ������android������������������������
+	private long getAvailMemory() {
 
 		ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		MemoryInfo mi = new MemoryInfo();
 		am.getMemoryInfo(mi);
-		// mi.availMem; ���������������������������
 
-//		return Formatter.formatFileSize(getBaseContext(), mi.availMem);// ���������������������������������
+//		return Formatter.formatFileSize(getBaseContext(), mi.availMem);
 		return mi.availMem;
 	}
+	
+	
+	
 
 }

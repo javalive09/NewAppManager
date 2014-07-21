@@ -1,6 +1,5 @@
 package com.peter.appmanager;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,6 +7,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 import com.peter.appmanager.R;
+import com.peter.appmanager.AppAdapter.AppInfo;
 import com.peter.appmanager.AppAdapter.ViewCache;
 
 import android.app.Activity;
@@ -129,9 +129,17 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
+		//反选
 		ViewCache viewCache = (ViewCache) view.getTag();
 		viewCache.app_CheckBox.toggle();// 反选
 		Boolean isChecked = viewCache.app_CheckBox.isChecked();
+		
+		//更新值
+		AppAdapter adapter = (AppAdapter) parent.getAdapter();
+		AppInfo info = (AppInfo) adapter.getItem(position);
+		
+		adapter.isSelected.put(info.packageName, isChecked);
+		
 		getSharedPreferences(AppManager.SETTING, MODE_PRIVATE).edit()
 				.putBoolean(viewCache.info.packageName, isChecked).commit();
 	}

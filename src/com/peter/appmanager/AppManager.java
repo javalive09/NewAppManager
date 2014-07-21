@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
@@ -103,6 +104,17 @@ public class AppManager extends Application {
 			if(info.packageName.equals(packageName)) {
 				return true;
 			}
+			
+//			if(info.metaData != null) {
+//				 String msg = info.metaData.getString("appType");
+			
+		    try {
+				ApplicationInfo appInfo = pm.getApplicationInfo(info.packageName, PackageManager.GET_META_DATA);
+				Log.i("packageName", info.packageName +" metaData = " + appInfo.metaData);
+			} catch (NameNotFoundException e) {
+				e.printStackTrace();
+			}
+//			}
 		}
 		return false;
     }
