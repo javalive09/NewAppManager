@@ -31,6 +31,7 @@ public class AppManager extends Application {
 	public static final int ALL = 1;
 	public static final int SHOW = 2;
 	public static final String SETTING = "setting";
+	public static final String CLEAN_METHOD = "clean_method";
 	
 	@Override
 	public void onCreate() {
@@ -38,7 +39,6 @@ public class AppManager extends Application {
 		Toast.makeText(getBaseContext(), "AppManager onCreate()", Toast.LENGTH_LONG).show();
 	}
 
-	
 	/**
 	 * 获取正在运行的应用信息
 	 * 

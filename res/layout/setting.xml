@@ -4,6 +4,51 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:gravity="center"
+        android:text="@string/screenoff_setting" />
+
+    <RadioGroup
+        android:id="@+id/cleansetting"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <RadioButton
+            android:id="@+id/screenoffsetting"
+            android:layout_width="fill_parent"
+            android:layout_height="50dip"
+            android:button="@null"
+            android:drawableRight="@android:drawable/btn_radio"
+            android:gravity="center"
+            android:text="@string/screenoff_setting_text" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1px"
+            android:background="?android:attr/listDivider" />
+
+        <RadioButton
+            android:id="@+id/floatsetting"
+            android:layout_width="fill_parent"
+            android:layout_height="50dip"
+            android:button="@null"
+            android:drawableRight="@android:drawable/btn_radio"
+            android:gravity="center"
+            android:checked="true"
+            android:text="@string/float_view_setting_text" />
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:gravity="center"
+        android:text="@string/except_text" />
+
     <ListView
         android:id="@+id/setting_list"
         android:layout_width="fill_parent"
@@ -12,6 +57,7 @@
         android:animationCache="true"
         android:divider="@android:color/black"
         android:fadingEdge="none"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
         android:fastScrollEnabled="true"
         android:layoutAnimation="@anim/animationlayout"
         android:scrollbarStyle="outsideInset"
@@ -34,9 +80,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left|center_vertical"
+            android:layout_marginLeft="30dp"
             android:background="@layout/button_bg"
             android:onClick="onClick"
-            android:layout_marginLeft="30dp"
             android:text="@string/install" />
 
         <Button
@@ -44,8 +90,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
-            android:background="@layout/button_bg"
             android:layout_marginRight="30dp"
+            android:background="@layout/button_bg"
             android:onClick="onClick"
             android:text="@string/uninstall" />
     </FrameLayout>

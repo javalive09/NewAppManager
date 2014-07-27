@@ -31,7 +31,7 @@ public class MainActivity extends Activity implements
 	OnItemClickListener, OnClickListener{
 
 	private AlertDialog mDialog = null;
-	private AppAdapter appAdapter = null;
+	private AppAdapter<AppInfo> appAdapter = null;
 	private ProgressBar mPb = null;
 	private Button mKill = null;
 
@@ -52,7 +52,7 @@ public class MainActivity extends Activity implements
 	private void relodData() {
 		setContentView(R.layout.main);
 		AppManager application = (AppManager) getApplication();
-		appAdapter = new AppAdapter(MainActivity.this, application.getRunningAppInfos(MainActivity.this, AppManager.SHOW), R.layout.listviewitem);
+		appAdapter = new AppAdapter<AppInfo>(MainActivity.this, application.getRunningAppInfos(MainActivity.this, AppManager.SHOW), R.layout.listviewitem);
 		ListView appListView = (ListView) findViewById(R.id.app_list);
 		mKill = (Button) findViewById(R.id.kill);
 		mKill.setText(getResources().getString(R.string.kill));
@@ -133,7 +133,7 @@ public class MainActivity extends Activity implements
 		Set<Entry<String, Boolean>> entrySet = appAdapter.isSelected.entrySet();
 		Iterator<Entry<String, Boolean>> it = entrySet.iterator();
 		while (it.hasNext()) {
-			Entry<String, Boolean> entry = (Entry<String, Boolean>) it.next();
+			Entry<String, Boolean> entry = it.next();
 			Boolean isSlected = entry.getValue();
 			if (isSlected) {
 				count++;
@@ -177,7 +177,7 @@ public class MainActivity extends Activity implements
 				ArrayList<String> packageNames = new ArrayList<String>();
 				AppManager application = (AppManager) getApplication();
 				while (iterator.hasNext()) {
-					Entry<String, Boolean> entry = (Entry<String, Boolean>) iterator.next();
+					Entry<String, Boolean> entry = iterator.next();
 					if (entry.getValue()) {
 						final String packageName = entry.getKey();
 						if(!packageName.equals(mPackageName)) {

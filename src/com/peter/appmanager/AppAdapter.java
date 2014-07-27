@@ -15,22 +15,22 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class AppAdapter extends BaseAdapter {
+public class AppAdapter<T> extends BaseAdapter {
 
-	private List<AppInfo> appInfos;
-	private LayoutInflater inflater;
-	private int itemResource;
+	private List<T> mAppInfos;
+	private LayoutInflater mInflater;
+	private int mItemResource;
 	public HashMap<String, Boolean> isSelected;
 
-	public AppAdapter(Context context, List<AppInfo> appInfos, int resource) {
-		this.appInfos = appInfos;
-		this.itemResource = resource;
-		inflater = LayoutInflater.from(context);
+	public AppAdapter(Context context, List<T> appInfos, int resource) {
+		this.mAppInfos = appInfos;
+		this.mItemResource = resource;
+		mInflater = LayoutInflater.from(context);
 		isSelected = new HashMap<String, Boolean>();
 	}
 
-	public List<AppInfo> getInfos() {
-		return appInfos;
+	public List<T> getInfos() {
+		return mAppInfos;
 	}
 	
 	/**
@@ -38,19 +38,19 @@ public class AppAdapter extends BaseAdapter {
 	 * 
 	 * @param appInfos
 	 */
-	public void updateData(List<AppInfo> appInfos) {
-		this.appInfos = appInfos;
+	public void updateData(List<T> appInfos) {
+		this.mAppInfos = appInfos;
 		notifyDataSetInvalidated();
 	}
 
 	@Override
 	public int getCount() {
-		return appInfos.size();
+		return mAppInfos.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return appInfos != null ? appInfos.get(position) : null;
+		return mAppInfos != null ? mAppInfos.get(position) : null;
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class AppAdapter extends BaseAdapter {
 		// 获取View
 		ViewCache cache = null;
 		if (convertView == null) {
-			convertView = inflater.inflate(itemResource, null);
+			convertView = mInflater.inflate(mItemResource, null);
 			ImageView app_icon = (ImageView) convertView
 					.findViewById(R.id.app_icon);
 			TextView app_name = (TextView) convertView

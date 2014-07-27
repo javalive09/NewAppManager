@@ -7,7 +7,7 @@
     <string name="selectall">全选</string>
     <string name="abselect">反选</string>
     <string name="kill">kill</string>
-    <string name="install_text">安装插件可以使应用不会被系统杀死</string>
+    <string name="install_text">安装插件可以使应用永远不会被系统杀死</string>
     <string name="install">install</string>
     <string name="uninstall">uninstall</string>
     <string name="action_help">help</string>
@@ -17,5 +17,9 @@
     <string name="action_help_msg">simple app for force stop apps</string>
     <string name="action_about_msg">simple app for force stop apps</string>
     <string name="except">the selected item wil not showing</string>
+    <string name="except_text">被选中的项将不会显示在被杀名单中</string>
+    <string name="screenoff_setting_text">关闭屏幕时清理内存</string>
+    <string name="float_view_setting_text">显示浮动气泡</string>
+    <string name="screenoff_setting">选择清理内存的快捷方式</string>
 
 </resources>

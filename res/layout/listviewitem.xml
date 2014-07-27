@@ -12,7 +12,7 @@
     时会引起Missing contentDescription attribute on image ，
     主要是因为在main.xml中没有使用TextView之类的文本控件，ADT会提示给像ImageView增加一个说明，
     这里添加android:contentDescription="@string/app_name即可，其实加不加影响不大。
-    只是在IDE中会显示一个黄色下划线，不美观。
+    只是在IDE中会显示一个黄色下划线，不美观。
     -->
 
     <ImageView
