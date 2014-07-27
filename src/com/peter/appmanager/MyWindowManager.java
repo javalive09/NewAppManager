@@ -24,7 +24,6 @@ public class MyWindowManager {
 	private LayoutParams smallWindowParams;
 	private ActivityManager mActivityManager;
 
-
 	public static MyWindowManager getInstance() {
 		return mManager;
 	}
@@ -40,7 +39,6 @@ public class MyWindowManager {
 	public void createSmallWindow(Context context) {
 		WindowManager windowManager = getWindowManager(context);
 		int screenWidth = windowManager.getDefaultDisplay().getWidth();
-		int screenHeight = windowManager.getDefaultDisplay().getHeight();
 		if (smallWindow == null) {
 			smallWindow = new FloatWindowSmallView(context);
 			if (smallWindowParams == null) {
@@ -53,7 +51,7 @@ public class MyWindowManager {
 				smallWindowParams.width = FloatWindowSmallView.viewWidth;
 				smallWindowParams.height = FloatWindowSmallView.viewHeight;
 				smallWindowParams.x = screenWidth;
-				smallWindowParams.y = screenHeight / 2;
+				smallWindowParams.y = 0;
 			}
 			smallWindow.setParams(smallWindowParams);
 			windowManager.addView(smallWindow, smallWindowParams);

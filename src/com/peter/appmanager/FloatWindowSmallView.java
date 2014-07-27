@@ -148,7 +148,9 @@ public class FloatWindowSmallView extends LinearLayout {
 			
 			break;
 		case MotionEvent.ACTION_UP:
-			
+			if(!canClick) {
+				
+			}
 			break;
 			
 		default:
@@ -159,7 +161,7 @@ public class FloatWindowSmallView extends LinearLayout {
 		Log.i("peter", "" + event.getAction() + result);
 		return true;
 	}
-
+	
 	/**
 	 * 将小悬浮窗的参数传入，用于更新小悬浮窗的位置。
 	 * 
@@ -177,6 +179,7 @@ public class FloatWindowSmallView extends LinearLayout {
 		mParams.x = (int) (xInScreen - xInView);
 		mParams.y = (int) (yInScreen - yInView);
 		windowManager.updateViewLayout(this, mParams);
+		
 	}
 
 	/**

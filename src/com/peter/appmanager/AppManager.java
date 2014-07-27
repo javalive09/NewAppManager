@@ -32,6 +32,8 @@ public class AppManager extends Application {
 	public static final int SHOW = 2;
 	public static final String SETTING = "setting";
 	public static final String CLEAN_METHOD = "clean_method";
+	public static final String FLOAT_X = "floatview_x";
+	public static final String FLOAT_Y = "floatview_y";
 	
 	@Override
 	public void onCreate() {
