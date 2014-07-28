@@ -7,13 +7,10 @@ import java.io.IOException;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
-import android.widget.TextView;
 
 
 public class MyWindowManager {
@@ -48,8 +45,8 @@ public class MyWindowManager {
 				smallWindowParams.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
 						| LayoutParams.FLAG_NOT_FOCUSABLE;
 				smallWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
-				smallWindowParams.width = FloatWindowSmallView.viewWidth;
-				smallWindowParams.height = FloatWindowSmallView.viewHeight;
+				smallWindowParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+				smallWindowParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
 				smallWindowParams.x = screenWidth;
 				smallWindowParams.y = 0;
 			}
@@ -72,8 +69,7 @@ public class MyWindowManager {
 	
 	public void updateUsedPercent(Context context) {
 		if (smallWindow != null) {
-			TextView percentView = (TextView) smallWindow.findViewById(R.id.percent);
-			percentView.setText(getUsedPercentValue(context));
+			smallWindow.setText(getUsedPercentValue(context));
 		}
 	}
 	

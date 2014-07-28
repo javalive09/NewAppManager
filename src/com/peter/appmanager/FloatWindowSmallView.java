@@ -5,30 +5,18 @@ import java.lang.reflect.Field;
 import android.content.Context;
 import android.os.Vibrator;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class FloatWindowSmallView extends LinearLayout {
-
-	/**
-	 * 记录小悬浮窗的宽度
-	 */
-	public static int viewWidth;
-
-	/**
-	 * 记录小悬浮窗的高度
-	 */
-	public static int viewHeight;
+public class FloatWindowSmallView extends TextView {
 
 	/**
 	 * 记录系统状态栏的高度
 	 */
-	 private static int statusBarHeight;
+	 private int statusBarHeight;
 
 	/**
 	 * 用于更新小悬浮窗的位置
@@ -64,12 +52,9 @@ public class FloatWindowSmallView extends LinearLayout {
 	public FloatWindowSmallView(final Context context) {
 		super(context);
 		windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		LayoutInflater.from(context).inflate(R.layout.float_window_small, this);
-		View view = findViewById(R.id.small_window_layout);
-		viewWidth = view.getLayoutParams().width;
-		viewHeight = view.getLayoutParams().height;
-		TextView percentView = (TextView) findViewById(R.id.percent);
-		percentView.setText(MyWindowManager.getInstance().getUsedPercentValue(context));
+		setBackgroundResource(R.drawable.bg_small);
+
+		setText(MyWindowManager.getInstance().getUsedPercentValue(context));
 		vibrator= (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE); 
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		
@@ -77,7 +62,7 @@ public class FloatWindowSmallView extends LinearLayout {
 			
 			@Override
 			public void onClick(View v) {
-				if(canClick) {
+//				if(canClick) {
 					isClicked = true;
 					long[] pattern = {800, 50, 400, 30}; // OFF/ON/OFF/ON...   
 					vibrator.vibrate(pattern, 2);
@@ -100,7 +85,7 @@ public class FloatWindowSmallView extends LinearLayout {
 					}).start();
 					
 				}
-			}
+//			}
 		});
 	}
 
@@ -111,54 +96,41 @@ public class FloatWindowSmallView extends LinearLayout {
 	float mStartX;
 	float mStartY;
 	
+	private boolean pointInView(int x, int y, int slop) {
+		 return x >= -slop && y >= -slop && x < ((getRight() - getLeft()) + slop) &&
+	                y < ((getBottom() - getTop()) + slop);
+	}
+	
+	boolean pointInView = true;
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		
+		super.onTouchEvent(event);
+		
+		int x = (int) event.getX();
+		int y = (int) event.getY();
+		xInScreen = event.getRawX();
+		yInScreen = event.getRawY() - getStatusBarHeight();
+		
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			// 手指按下时记录必要数据,纵坐标的值都需要减去状态栏高度
-			xInView = event.getX();
-			yInView = event.getY();
-			mStartX = xInView;
-			mStartY = yInView;
-			xInScreen = event.getRawX();
-			yInScreen = event.getRawY() - getStatusBarHeight();
-			isClicked = false;
-			canClick = true;
+			xInView = x;
+			yInView = y;
+			pointInView = false;
+			
 			break;
 		case MotionEvent.ACTION_MOVE:
-			
-			xInScreen = event.getRawX();
-			yInScreen = event.getRawY() - getStatusBarHeight();
-			
-			float deltaX = Math.abs(xInScreen - mStartX);
-			float deltaY = Math.abs(yInScreen - mStartY);
-			
-			if(!isClicked) {
-				if(deltaX > mTouchSlop || deltaY > mTouchSlop) {
-					canClick = false;
-					
-					Log.i("peter", "canClick = false");
-	//				if(!isLongClick) {
-						// 手指移动的时候更新小悬浮窗的位置
-						updateViewPosition();
-	//				}
-				}
+		
+			if(pointInView) {
+				pointInView = pointInView(x, y, mTouchSlop);
+			}else {
+				updateViewPosition();
 			}
 			
-			break;
-		case MotionEvent.ACTION_UP:
-			if(!canClick) {
-				
-			}
-			break;
-			
-		default:
 			break;
 		}
 		
-		boolean result = super.onTouchEvent(event);
-		Log.i("peter", "" + event.getAction() + result);
 		return true;
 	}
 	
