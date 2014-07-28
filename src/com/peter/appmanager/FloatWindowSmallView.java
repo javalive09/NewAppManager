@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import android.content.Context;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -13,6 +14,10 @@ import android.widget.TextView;
 
 public class FloatWindowSmallView extends TextView {
 
+	private int mTouchSlop;
+	
+	private boolean pointInView;
+	
 	/**
 	 * 记录系统状态栏的高度
 	 */
@@ -54,54 +59,46 @@ public class FloatWindowSmallView extends TextView {
 		windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		setBackgroundResource(R.drawable.bg_small);
 
+		setGravity(Gravity.CENTER);
 		setText(MyWindowManager.getInstance().getUsedPercentValue(context));
-		vibrator= (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE); 
+		final Vibrator vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE); 
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		
 		setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-//				if(canClick) {
-					isClicked = true;
-					long[] pattern = {800, 50, 400, 30}; // OFF/ON/OFF/ON...   
-					vibrator.vibrate(pattern, 2);
-					
-					MyService service = (MyService) context;
-					service.kill();
-					
-					new Thread(new Runnable() {
+				long[] pattern = {800, 50, 400, 30}; // OFF/ON/OFF/ON...   
+				vibrator.vibrate(pattern, 2);
+				
+				MyService service = (MyService) context;
+				service.kill();
+				
+				new Thread(new Runnable() {
 
-						@Override
-						public void run() {
-							try {
-								Thread.sleep(2000);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-							vibrator.cancel();
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-						
-					}).start();
+						vibrator.cancel();
+					}
 					
-				}
-//			}
+				}).start();
+				
+			}
 		});
 	}
-
-	boolean isClicked = false;
-	boolean canClick = true;
-	Vibrator vibrator;
-	int mTouchSlop;
-	float mStartX;
-	float mStartY;
 	
 	private boolean pointInView(int x, int y, int slop) {
+		Log.i("peter", "right="+getRight() + ";left="+getLeft());
+		Log.i("peter", "top="+getTop() + ";bottom="+getBottom());
+		
 		 return x >= -slop && y >= -slop && x < ((getRight() - getLeft()) + slop) &&
 	                y < ((getBottom() - getTop()) + slop);
 	}
-	
-	boolean pointInView = true;
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -112,12 +109,13 @@ public class FloatWindowSmallView extends TextView {
 		int y = (int) event.getY();
 		xInScreen = event.getRawX();
 		yInScreen = event.getRawY() - getStatusBarHeight();
+		Log.i("peter", "x="+x + ";y="+y);
 		
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			xInView = x;
 			yInView = y;
-			pointInView = false;
+			pointInView = true;
 			
 			break;
 		case MotionEvent.ACTION_MOVE:
@@ -125,6 +123,7 @@ public class FloatWindowSmallView extends TextView {
 			if(pointInView) {
 				pointInView = pointInView(x, y, mTouchSlop);
 			}else {
+				Log.i("peter", "move-------");
 				updateViewPosition();
 			}
 			
