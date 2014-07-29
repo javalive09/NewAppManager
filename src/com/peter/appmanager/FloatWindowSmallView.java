@@ -3,16 +3,14 @@ package com.peter.appmanager;
 import java.lang.reflect.Field;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.widget.TextView;
 
-public class FloatWindowSmallView extends View {
+public class FloatWindowSmallView extends TextView {
 
 	private int mTouchSlop;
 
@@ -23,11 +21,11 @@ public class FloatWindowSmallView extends View {
 	private WindowManager windowManager;
 
 	private WindowManager.LayoutParams mParams;
-	
-	private CharSequence mText;
-	
-	private Paint mPaint;
 
+	int mPercent;
+	
+	public boolean mAnim = false;
+	
 	/**
 	 * 记录手指按下时在小悬浮窗的View上的横坐标的值
 	 */
@@ -43,14 +41,9 @@ public class FloatWindowSmallView extends View {
 		windowManager = (WindowManager) context
 				.getSystemService(Context.WINDOW_SERVICE);
 		setBackgroundResource(R.drawable.bg_small);
+		setGravity(Gravity.CENTER);
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		initStatusBarHeight();
-		mPaint = new Paint();
-	}
-	
-	public void setText(CharSequence text) {
-		mText = text;
-		invalidate();
 	}
 
 	private boolean pointInView(int x, int y, int slop) {
@@ -58,27 +51,61 @@ public class FloatWindowSmallView extends View {
 				&& x < ((getRight() - getLeft()) + slop)
 				&& y < ((getBottom() - getTop()) + slop);
 	}
-
-	public void setEnabled(boolean enabled) {
-		
-		super.setEnabled(enabled);
+	
+	public void setTextPercent(int percent) {
+		mPercent = percent;
+		setText(percent + "%");
 	}
 	
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		int width = getSuggestedMinimumWidth();	
-		int height = getSuggestedMinimumHeight();
-		setMeasuredDimension(width, height);
+	public void startAnim(final int upLimit, final int msec) {
+		mAnim = true;
+		setEnabled(false);
+		subTractPercent(upLimit, msec);
 	}
+	
+	public void subTractPercent(final int upLimit, final int msec) {
+		if(mPercent > 0 ) {
+			postDelayed(new Runnable(){
 
-	@Override
-	protected void onDraw(Canvas canvas) {
-		
-		mPaint.setTextSize(30);
-		mPaint.setColor(Color.WHITE);
-		canvas.drawText(mText.toString(), 0, 30, mPaint);
+				@Override
+				public void run() {
+					mPercent--;
+					setTextPercent(mPercent);
+					int time = 0;
+					if(msec > 0) {
+						time = msec -1;
+					}
+					subTractPercent(upLimit, time);
+				}
+				
+			}, msec);
+		}else if(mPercent == 0) {
+			plusPercent(upLimit, 1);
+		}
 	}
+	
+	private void plusPercent(final int uplimit, final int msec) {
+		if(mPercent < uplimit) {
+			postDelayed(new Runnable(){
 
+				@Override
+				public void run() {
+					mPercent++;
+					int time = 100;
+					if(msec < 100) {
+						time = msec + 1;
+					}
+					setTextPercent(mPercent);
+					plusPercent(uplimit, time);
+				}
+				
+			}, msec);
+		}else{
+			mAnim = false;
+			setEnabled(true);
+		}
+	}
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 

@@ -48,7 +48,6 @@ public class MyWindowManager {
 			updateUsedPercent(service.getUsedPercentValue(context));
 			
 			windowManager.addView(smallWindow, smallWindowParams);
-			final Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 			smallWindow.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -58,8 +57,6 @@ public class MyWindowManager {
 
 						@Override
 						protected ArrayList<String> doInBackground(Void... params) {
-							long[] pattern = { 800, 50, 400, 30 }; // OFF/ON/OFF/ON...
-							vibrator.vibrate(pattern, 2);
 							
 							service.killAll();
 
@@ -73,13 +70,12 @@ public class MyWindowManager {
 
 						@Override
 						protected void onPreExecute() {
-							v.setEnabled(false);
+							smallWindow.startAnim(50, service.getUsedPercentValue(context) / 3 * 2);
 						}
 
 						@Override
 						protected void onPostExecute(ArrayList<String> packageNames) {
-							vibrator.cancel();
-							v.setEnabled(true);
+							
 						}
 
 					}.execute();
@@ -102,7 +98,9 @@ public class MyWindowManager {
 	
 	public void updateUsedPercent(int percent) {
 		if (smallWindow != null) {
-			smallWindow.setText(percent + "%");
+			if(!smallWindow.mAnim) {
+				smallWindow.setTextPercent(percent);
+			}
 		}
 	}
 
