@@ -1,24 +1,18 @@
 package com.peter.appmanager;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.peter.appmanager.AppAdapter.AppInfo;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.os.Vibrator;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
-import android.widget.TextView;
-import android.widget.Toast;
 
-public class FloatWindowSmallView extends TextView {
+public class FloatWindowSmallView extends View {
 
 	private int mTouchSlop;
 
@@ -29,6 +23,10 @@ public class FloatWindowSmallView extends TextView {
 	private WindowManager windowManager;
 
 	private WindowManager.LayoutParams mParams;
+	
+	private CharSequence mText;
+	
+	private Paint mPaint;
 
 	/**
 	 * 记录手指按下时在小悬浮窗的View上的横坐标的值
@@ -45,15 +43,40 @@ public class FloatWindowSmallView extends TextView {
 		windowManager = (WindowManager) context
 				.getSystemService(Context.WINDOW_SERVICE);
 		setBackgroundResource(R.drawable.bg_small);
-		setGravity(Gravity.CENTER);
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		initStatusBarHeight();
+		mPaint = new Paint();
+	}
+	
+	public void setText(CharSequence text) {
+		mText = text;
+		invalidate();
 	}
 
 	private boolean pointInView(int x, int y, int slop) {
 		return x >= -slop && y >= -slop
 				&& x < ((getRight() - getLeft()) + slop)
 				&& y < ((getBottom() - getTop()) + slop);
+	}
+
+	public void setEnabled(boolean enabled) {
+		
+		super.setEnabled(enabled);
+	}
+	
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		int width = getSuggestedMinimumWidth();	
+		int height = getSuggestedMinimumHeight();
+		setMeasuredDimension(width, height);
+	}
+
+	@Override
+	protected void onDraw(Canvas canvas) {
+		
+		mPaint.setTextSize(30);
+		mPaint.setColor(Color.WHITE);
+		canvas.drawText(mText.toString(), 0, 30, mPaint);
 	}
 
 	@Override
