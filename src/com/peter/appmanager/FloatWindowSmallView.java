@@ -1,7 +1,7 @@
 package com.peter.appmanager;
 
 import java.lang.reflect.Field;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Vibrator;
 import android.util.Log;
@@ -34,17 +34,6 @@ public class FloatWindowSmallView extends TextView {
 	private WindowManager.LayoutParams mParams;
 
 	/**
-	 * 记录当前手指位置在屏幕上的横坐标值
-	 */
-	private float xInScreen;
-
-	/**
-	 * 记录当前手指位置在屏幕上的纵坐标值
-	 */
-	private float yInScreen;
-
-
-	/**
 	 * 记录手指按下时在小悬浮窗的View上的横坐标的值
 	 */
 	private float xInView;
@@ -63,6 +52,7 @@ public class FloatWindowSmallView extends TextView {
 		setText(MyWindowManager.getInstance().getUsedPercentValue(context));
 		final Vibrator vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE); 
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+		initStatusBarHeight();
 		
 		setOnClickListener(new OnClickListener() {
 			
@@ -93,9 +83,6 @@ public class FloatWindowSmallView extends TextView {
 	}
 	
 	private boolean pointInView(int x, int y, int slop) {
-		Log.i("peter", "right="+getRight() + ";left="+getLeft());
-		Log.i("peter", "top="+getTop() + ";bottom="+getBottom());
-		
 		 return x >= -slop && y >= -slop && x < ((getRight() - getLeft()) + slop) &&
 	                y < ((getBottom() - getTop()) + slop);
 	}
@@ -105,26 +92,26 @@ public class FloatWindowSmallView extends TextView {
 		
 		super.onTouchEvent(event);
 		
-		int x = (int) event.getX();
-		int y = (int) event.getY();
-		xInScreen = event.getRawX();
-		yInScreen = event.getRawY() - getStatusBarHeight();
-		Log.i("peter", "x="+x + ";y="+y);
-		
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			xInView = x;
-			yInView = y;
 			pointInView = true;
 			
 			break;
 		case MotionEvent.ACTION_MOVE:
 		
 			if(pointInView) {
+				int x = (int) event.getX();
+				int y = (int) event.getY();
 				pointInView = pointInView(x, y, mTouchSlop);
+				if(!pointInView) {
+					xInView = x;
+					yInView = y;
+				}
 			}else {
+				float screenX = event.getRawX();
+				float screenY = event.getRawY() - statusBarHeight;
 				Log.i("peter", "move-------");
-				updateViewPosition();
+				updateViewPosition(screenX, screenY);
 			}
 			
 			break;
@@ -146,11 +133,10 @@ public class FloatWindowSmallView extends TextView {
 	/**
 	 * 更新小悬浮窗在屏幕中的位置。
 	 */
-	private void updateViewPosition() {
-		mParams.x = (int) (xInScreen - xInView);
-		mParams.y = (int) (yInScreen - yInView);
+	private void updateViewPosition(float screenX, float screenY) {
+		mParams.x = (int) (screenX - xInView);
+		mParams.y = (int) (screenY - yInView);
 		windowManager.updateViewLayout(this, mParams);
-		
 	}
 
 	/**
@@ -158,7 +144,7 @@ public class FloatWindowSmallView extends TextView {
 	 * 
 	 * @return 返回状态栏高度的像素值。
 	 */
-	private int getStatusBarHeight() {
+	private void initStatusBarHeight() {
 		if (statusBarHeight == 0) {
 			try {
 				Class<?> c = Class.forName("com.android.internal.R$dimen");
@@ -170,7 +156,6 @@ public class FloatWindowSmallView extends TextView {
 				e.printStackTrace();
 			}
 		}
-		return statusBarHeight;
 	}
 
 }
