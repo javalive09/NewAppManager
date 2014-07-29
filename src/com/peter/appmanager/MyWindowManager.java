@@ -1,41 +1,33 @@
 package com.peter.appmanager;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
-import android.app.ActivityManager;
+import java.util.ArrayList;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
+import android.os.AsyncTask;
+import android.os.Vibrator;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
 
 
 public class MyWindowManager {
 	
 	private static MyWindowManager mManager = new MyWindowManager();
-	private WindowManager mWindowManager;
 	private FloatWindowSmallView smallWindow;
 	private LayoutParams smallWindowParams;
-	private ActivityManager mActivityManager;
 
 	public static MyWindowManager getInstance() {
 		return mManager;
 	}
 	
-	private WindowManager getWindowManager(Context context) {
-		if (mWindowManager == null) {
-			mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		}
-		return mWindowManager;
-	}
-	
-	@SuppressWarnings("deprecation")
-	public void createSmallWindow(Context context) {
-		WindowManager windowManager = getWindowManager(context);
-		int screenWidth = windowManager.getDefaultDisplay().getWidth();
+	public void createSmallWindow(final Context context) {
+		WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		Point outSize = new Point();
+		windowManager.getDefaultDisplay().getSize(outSize);
 		if (smallWindow == null) {
 			smallWindow = new FloatWindowSmallView(context);
 			if (smallWindowParams == null) {
@@ -47,17 +39,58 @@ public class MyWindowManager {
 				smallWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
 				smallWindowParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
 				smallWindowParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-				smallWindowParams.x = screenWidth;
+				smallWindowParams.x = outSize.x;
 				smallWindowParams.y = 0;
 			}
 			smallWindow.setParams(smallWindowParams);
+			
+			final MyService service = (MyService) context;
+			updateUsedPercent(service.getUsedPercentValue(context));
+			
 			windowManager.addView(smallWindow, smallWindowParams);
+			final Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+			smallWindow.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(final View v) {
+
+					new AsyncTask<Void, Integer, ArrayList<String>>() {
+
+						@Override
+						protected ArrayList<String> doInBackground(Void... params) {
+							long[] pattern = { 800, 50, 400, 30 }; // OFF/ON/OFF/ON...
+							vibrator.vibrate(pattern, 2);
+							
+							service.killAll();
+
+							try {
+								Thread.sleep(2000);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+							return null;
+						}
+
+						@Override
+						protected void onPreExecute() {
+							v.setEnabled(false);
+						}
+
+						@Override
+						protected void onPostExecute(ArrayList<String> packageNames) {
+							vibrator.cancel();
+							v.setEnabled(true);
+						}
+
+					}.execute();
+				}
+			});
 		}
 	}
 	
 	public void removeSmallWindow(Context context) {
 		if (smallWindow != null) {
-			WindowManager windowManager = getWindowManager(context);
+			WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 			windowManager.removeView(smallWindow);
 			smallWindow = null;
 		}
@@ -67,41 +100,10 @@ public class MyWindowManager {
 		return smallWindow != null;
 	}
 	
-	public void updateUsedPercent(Context context) {
+	public void updateUsedPercent(int percent) {
 		if (smallWindow != null) {
-			smallWindow.setText(getUsedPercentValue(context));
+			smallWindow.setText(percent + "%");
 		}
-	}
-	
-	public String getUsedPercentValue(Context context) {
-		String dir = "/proc/meminfo";
-		try {
-			FileReader fr = new FileReader(dir);
-			BufferedReader br = new BufferedReader(fr, 2048);
-			String memoryLine = br.readLine();
-			String subMemoryLine = memoryLine.substring(memoryLine.indexOf("MemTotal:"));
-			br.close();
-			long totalMemorySize = Integer.parseInt(subMemoryLine.replaceAll("\\D+", ""));
-			long availableSize = getAvailableMemory(context) / 1024;
-			int percent = (int) ((totalMemorySize - availableSize) / (float) totalMemorySize * 100);
-			return percent + "%";
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return "悬浮窗";
-	}
-	
-	private long getAvailableMemory(Context context) {
-		ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
-		getActivityManager(context).getMemoryInfo(mi);
-		return mi.availMem;
-	}
-	
-	private ActivityManager getActivityManager(Context context) {
-		if (mActivityManager == null) {
-			mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-		}
-		return mActivityManager;
 	}
 
 }

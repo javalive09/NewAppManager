@@ -1,8 +1,13 @@
 package com.peter.appmanager;
 
 import java.lang.reflect.Field;
-import android.annotation.SuppressLint;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.peter.appmanager.AppAdapter.AppInfo;
+
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;
@@ -11,26 +16,18 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FloatWindowSmallView extends TextView {
 
 	private int mTouchSlop;
-	
-	private boolean pointInView;
-	
-	/**
-	 * 记录系统状态栏的高度
-	 */
-	 private int statusBarHeight;
 
-	/**
-	 * 用于更新小悬浮窗的位置
-	 */
+	private boolean pointInView;
+
+	private int statusBarHeight;
+
 	private WindowManager windowManager;
 
-	/**
-	 * 小悬浮窗的参数
-	 */
 	private WindowManager.LayoutParams mParams;
 
 	/**
@@ -45,81 +42,53 @@ public class FloatWindowSmallView extends TextView {
 
 	public FloatWindowSmallView(final Context context) {
 		super(context);
-		windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		windowManager = (WindowManager) context
+				.getSystemService(Context.WINDOW_SERVICE);
 		setBackgroundResource(R.drawable.bg_small);
-
 		setGravity(Gravity.CENTER);
-		setText(MyWindowManager.getInstance().getUsedPercentValue(context));
-		final Vibrator vibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE); 
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		initStatusBarHeight();
-		
-		setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				long[] pattern = {800, 50, 400, 30}; // OFF/ON/OFF/ON...   
-				vibrator.vibrate(pattern, 2);
-				
-				MyService service = (MyService) context;
-				service.kill();
-				
-				new Thread(new Runnable() {
+	}
 
-					@Override
-					public void run() {
-						try {
-							Thread.sleep(2000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						vibrator.cancel();
-					}
-					
-				}).start();
-				
-			}
-		});
-	}
-	
 	private boolean pointInView(int x, int y, int slop) {
-		 return x >= -slop && y >= -slop && x < ((getRight() - getLeft()) + slop) &&
-	                y < ((getBottom() - getTop()) + slop);
+		return x >= -slop && y >= -slop
+				&& x < ((getRight() - getLeft()) + slop)
+				&& y < ((getBottom() - getTop()) + slop);
 	}
-	
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		
+
 		super.onTouchEvent(event);
-		
+
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			pointInView = true;
-			
+
 			break;
 		case MotionEvent.ACTION_MOVE:
-		
-			if(pointInView) {
+
+			if (pointInView) {
 				int x = (int) event.getX();
 				int y = (int) event.getY();
 				pointInView = pointInView(x, y, mTouchSlop);
-				if(!pointInView) {
+				if (!pointInView) {
 					xInView = x;
 					yInView = y;
 				}
-			}else {
+			} else {
 				float screenX = event.getRawX();
 				float screenY = event.getRawY() - statusBarHeight;
 				Log.i("peter", "move-------");
 				updateViewPosition(screenX, screenY);
 			}
-			
+
 			break;
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * 将小悬浮窗的参数传入，用于更新小悬浮窗的位置。
 	 * 

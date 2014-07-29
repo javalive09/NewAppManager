@@ -1,6 +1,5 @@
 package com.peter.appmanager;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -202,35 +201,5 @@ public class AppManager extends Application {
         }
         return infos;
     }
-	
-	public void commandLineForceStop(String packageName) {
-		List<String> commands = new ArrayList<String>();
-		commands.add("su");
-		commands.add("|");
-		commands.add("am");
-		commands.add("force-stop");
-		commands.add(packageName);
-		ProcessBuilder pb = new ProcessBuilder(commands);
-		try {
-			pb.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void commandLineKillAll() {
-		List<String> commands = new ArrayList<String>();
-		commands.add("su");
-		commands.add("|");
-		commands.add("am");
-		commands.add("kill-all");
-		ProcessBuilder pb = new ProcessBuilder(commands);
-		try {
-			pb.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
 	
 }

@@ -9,7 +9,6 @@ import java.util.List;
 import com.peter.appmanager.AppAdapter.AppInfo;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.MemoryInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -36,23 +35,6 @@ public class MyService extends Service {
 		return new MyBinder();
 	}
 
-	public void kill() {
-		AppManager application = (AppManager) getApplication();
-		List<AppInfo> list = application.getRunningAppInfos(MyService.this,
-				AppManager.SHOW);
-		String mPackageName = getPackageName();
-		for (AppInfo info : list) {
-			String packageName = info.packageName;
-			if (!packageName.equals(mPackageName)) {
-				application.commandLineForceStop(packageName);
-			}
-		}
-		application.commandLineKillAll();
-		Toast.makeText(this, "Manager Service invoke kill()!!",
-				Toast.LENGTH_SHORT).show();
-
-	}
-
 	public class MyBinder extends Binder {
 		public MyService getService() {
 			return MyService.this;
@@ -75,8 +57,64 @@ public class MyService extends Service {
 				Toast.LENGTH_SHORT).show();
 		return START_STICKY;
 	}
-	
-	
+
+	private ArrayList<String> getKillList() {
+		ArrayList<String> killList = new ArrayList<String>();
+		AppManager application = (AppManager) getApplicationContext();
+		List<AppInfo> list = application.getRunningAppInfos(MyService.this,
+				AppManager.SHOW);
+		String mPackageName = getPackageName();
+		for (AppInfo info : list) {
+			String packageName = info.packageName;
+			if (!packageName.equals(mPackageName)) {
+				killList.add(packageName);
+			}
+		}
+		return killList;
+	}
+
+	public void killAll() {
+		kill(getKillList());
+	}
+
+	public void kill(ArrayList<String> list) {
+		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		for (String packageName : list) {
+			manager.killBackgroundProcesses(packageName);
+			commandLineForceStop(packageName);
+		}
+		commandLineKillAll();
+	}
+
+	private void commandLineForceStop(String packageName) {
+		List<String> commands = new ArrayList<String>();
+		commands.add("su");
+		commands.add("|");
+		commands.add("am");
+		commands.add("force-stop");
+		commands.add(packageName);
+		ProcessBuilder pb = new ProcessBuilder(commands);
+		try {
+			pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void commandLineKillAll() {
+		List<String> commands = new ArrayList<String>();
+		commands.add("su");
+		commands.add("|");
+		commands.add("am");
+		commands.add("kill-all");
+		ProcessBuilder pb = new ProcessBuilder(commands);
+		try {
+			pb.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 
 	@Override
 	public void onCreate() {
@@ -84,18 +122,20 @@ public class MyService extends Service {
 		mHandler.sendEmptyMessageDelayed(0, 5000);
 		showFloatView();
 
-		final String screenoff = getResources().getString(R.string.screenoff_setting);
-		boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD, MODE_PRIVATE).getBoolean(screenoff, false);
-		if(isScreenOff) {
+		final String screenoff = getResources().getString(
+				R.string.screenoff_setting);
+		boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
+				MODE_PRIVATE).getBoolean(screenoff, false);
+		if (isScreenOff) {
 			registerReceiver();
 		}
-		
+
 	}
 
 	public void showFloatView() {
 		mFloatViewHandler.sendEmptyMessageDelayed(0, 500);
 	}
-	
+
 	final BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
@@ -103,11 +143,10 @@ public class MyService extends Service {
 			String action = intent.getAction();
 
 			if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-				float rate = (float) getAvailMemory() / getTotalMemory();
-				Toast.makeText(context, "available memery rate =" + rate,
-						Toast.LENGTH_LONG).show();
-				if (rate < 0.3) {
-					kill();
+				int percent = getUsedPercentValue(context);
+				Toast.makeText(context, "available memery rate =" + percent + "%", Toast.LENGTH_LONG).show();
+				if (percent > 80) {
+					killAll();
 				}
 			}
 		}
@@ -135,20 +174,22 @@ public class MyService extends Service {
 			}
 		};
 	};
-	
+
 	Handler mFloatViewHandler = new Handler(Looper.getMainLooper()) {
 		public void handleMessage(Message msg) {
-			final String screenoff = getResources().getString(R.string.screenoff_setting);
-			boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD, MODE_PRIVATE).getBoolean(screenoff, false);
-			
-			if(!isScreenOff) {
+			final String screenoff = getResources().getString(
+					R.string.screenoff_setting);
+			boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
+					MODE_PRIVATE).getBoolean(screenoff, false);
+
+			if (!isScreenOff) {
 				floatViewAction();
 				sendEmptyMessageDelayed(0, 500);
 			}
-			
+
 		};
 	};
-	
+
 	private void floatViewAction() {
 		// 当前界面是桌面，且没有悬浮窗显示，则创建悬浮窗。
 		if (isHome() && !MyWindowManager.getInstance().isWindowShowing()) {
@@ -160,8 +201,33 @@ public class MyService extends Service {
 		}
 		// 当前界面是桌面，且有悬浮窗显示，则更新内存数据。
 		else if (isHome() && MyWindowManager.getInstance().isWindowShowing()) {
-			MyWindowManager.getInstance().updateUsedPercent(MyService.this);
+			MyWindowManager.getInstance().updateUsedPercent(getUsedPercentValue(MyService.this));
 		}
+	}
+	
+	public int getUsedPercentValue(Context context) {
+		String dir = "/proc/meminfo";
+		try {
+			FileReader fr = new FileReader(dir);
+			BufferedReader br = new BufferedReader(fr, 2048);
+			String memoryLine = br.readLine();
+			String subMemoryLine = memoryLine.substring(memoryLine.indexOf("MemTotal:"));
+			br.close();
+			long totalMemorySize = Integer.parseInt(subMemoryLine.replaceAll("\\D+", ""));
+			long availableSize = getAvailableMemory(context) / 1024;
+			int percent = (int) ((totalMemorySize - availableSize) / (float) totalMemorySize * 100);
+			return percent ;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
+	private long getAvailableMemory(Context context) {
+		ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		mActivityManager.getMemoryInfo(mi);
+		return mi.availMem;
 	}
 	
 	/**
@@ -183,45 +249,13 @@ public class MyService extends Service {
 		PackageManager packageManager = this.getPackageManager();
 		Intent intent = new Intent(Intent.ACTION_MAIN);
 		intent.addCategory(Intent.CATEGORY_HOME);
-		List<ResolveInfo> resolveInfo = packageManager.queryIntentActivities(intent,
-				PackageManager.MATCH_DEFAULT_ONLY);
+		List<ResolveInfo> resolveInfo = packageManager.queryIntentActivities(
+				intent, PackageManager.MATCH_DEFAULT_ONLY);
 		for (ResolveInfo ri : resolveInfo) {
 			names.add(ri.activityInfo.packageName);
 		}
 		return names;
 	}
-	
-	private long getTotalMemory() {
-		String str1 = "/proc/meminfo";
-		String str2;
-		String[] arrayOfString;
-		long initial_memory = 0;
 
-		try {
-			FileReader localFileReader = new FileReader(str1);
-			BufferedReader localBufferedReader = new BufferedReader(
-					localFileReader, 8192);
-			str2 = localBufferedReader.readLine();
-
-			arrayOfString = str2.split("\\s+");
-
-			initial_memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;
-			localBufferedReader.close();
-
-		} catch (IOException e) {
-		}
-		// return Formatter.formatFileSize(getBaseContext(), initial_memory);//
-		return initial_memory;
-	}
-
-	private long getAvailMemory() {
-
-		ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-		MemoryInfo mi = new MemoryInfo();
-		am.getMemoryInfo(mi);
-
-		// return Formatter.formatFileSize(getBaseContext(), mi.availMem);
-		return mi.availMem;
-	}
 
 }
