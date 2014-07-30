@@ -52,7 +52,7 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 						AppManager.ALL), R.layout.listviewitem);
 		ListView appListView = (ListView) findViewById(R.id.setting_list);
 		appAdapter.isSelected = (HashMap<String, Boolean>) getSharedPreferences(
-				AppManager.SETTING, MODE_PRIVATE).getAll();
+				AppManager.CONFIG, MODE_PRIVATE).getAll();
 		appListView.setAdapter(appAdapter);
 		appListView.setOnItemClickListener(this);
 		
@@ -213,7 +213,7 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 		
 		adapter.isSelected.put(info.packageName, isChecked);
 		
-		getSharedPreferences(AppManager.SETTING, MODE_PRIVATE).edit()
+		getSharedPreferences(AppManager.CONFIG, MODE_PRIVATE).edit()
 				.putBoolean(viewCache.info.packageName, isChecked).commit();
 	}
 

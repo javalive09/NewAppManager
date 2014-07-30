@@ -3,6 +3,7 @@ package com.peter.appmanager;
 import java.lang.reflect.Field;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -114,6 +115,8 @@ public class FloatWindowSmallView extends TextView {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
 			pointInView = true;
+			xInView = (int) event.getX();
+			yInView = (int) event.getY();
 
 			break;
 		case MotionEvent.ACTION_MOVE:
@@ -122,10 +125,6 @@ public class FloatWindowSmallView extends TextView {
 				int x = (int) event.getX();
 				int y = (int) event.getY();
 				pointInView = pointInView(x, y, mTouchSlop);
-				if (!pointInView) {
-					xInView = x;
-					yInView = y;
-				}
 			} else {
 				float screenX = event.getRawX();
 				float screenY = event.getRawY() - statusBarHeight;
@@ -134,9 +133,18 @@ public class FloatWindowSmallView extends TextView {
 			}
 
 			break;
+		case MotionEvent.ACTION_UP:
+			savePosition();
 		}
 
 		return true;
+	}
+	
+	private void savePosition() {
+		getContext().getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).edit()
+		.putInt("pos_x", mParams.x).commit();
+		getContext().getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).edit()
+		.putInt("pos_y", mParams.y).commit();
 	}
 
 	/**

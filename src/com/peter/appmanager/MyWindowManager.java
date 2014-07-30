@@ -1,11 +1,11 @@
 package com.peter.appmanager;
 
 import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.AsyncTask;
-import android.os.Vibrator;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,38 +17,62 @@ import android.view.WindowManager.LayoutParams;
 public class MyWindowManager {
 	
 	private static MyWindowManager mManager = new MyWindowManager();
-	private FloatWindowSmallView smallWindow;
-	private LayoutParams smallWindowParams;
+	private FloatWindowSmallView mFloatView;
+	private WindowManager mWindowManager;
 
+	private MyWindowManager() {}
+	
 	public static MyWindowManager getInstance() {
 		return mManager;
 	}
 	
+	private LayoutParams getParams(Context context) {
+		
+		LayoutParams params = new LayoutParams();
+		params.type = LayoutParams.TYPE_PHONE;
+		params.format = PixelFormat.RGBA_8888;
+		params.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
+					| LayoutParams.FLAG_NOT_FOCUSABLE;
+		params.gravity = Gravity.LEFT | Gravity.TOP;
+		params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+		params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+		
+		int x = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_x", -1);
+		int y = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_y", -1);
+		
+		if(x == -1) {
+			Point outSize = new Point();
+			mWindowManager.getDefaultDisplay().getSize(outSize);
+			x = outSize.x;
+		}
+		
+		if(y == -1) {
+			Point outSize = new Point();
+			mWindowManager.getDefaultDisplay().getSize(outSize);
+			y = outSize.y / 2;
+		}
+		
+		params.x = x;
+		params.y = y;
+		
+		return params;
+	}
+	
 	public void createSmallWindow(final Context context) {
-		WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		Point outSize = new Point();
-		windowManager.getDefaultDisplay().getSize(outSize);
-		if (smallWindow == null) {
-			smallWindow = new FloatWindowSmallView(context);
-			if (smallWindowParams == null) {
-				smallWindowParams = new LayoutParams();
-				smallWindowParams.type = LayoutParams.TYPE_PHONE;
-				smallWindowParams.format = PixelFormat.RGBA_8888;
-				smallWindowParams.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
-						| LayoutParams.FLAG_NOT_FOCUSABLE;
-				smallWindowParams.gravity = Gravity.LEFT | Gravity.TOP;
-				smallWindowParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-				smallWindowParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-				smallWindowParams.x = outSize.x;
-				smallWindowParams.y = 0;
-			}
-			smallWindow.setParams(smallWindowParams);
+		if(mWindowManager == null) {
+			mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+		}
+		
+		if (mFloatView == null) {
+			mFloatView = new FloatWindowSmallView(context);
+			LayoutParams params = getParams(context);
+			mFloatView.setParams(params);
 			
 			final MyService service = (MyService) context;
 			updateUsedPercent(service.getUsedPercentValue(context));
 			
-			windowManager.addView(smallWindow, smallWindowParams);
-			smallWindow.setOnClickListener(new OnClickListener() {
+			mWindowManager.addView(mFloatView, params);
+			mFloatView.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(final View v) {
@@ -70,7 +94,7 @@ public class MyWindowManager {
 
 						@Override
 						protected void onPreExecute() {
-							smallWindow.startAnim(50, service.getUsedPercentValue(context) / 3 * 2);
+							mFloatView.startAnim(service.getUsedPercentValue(context) / 3 * 2 , 50);
 						}
 
 						@Override
@@ -85,21 +109,20 @@ public class MyWindowManager {
 	}
 	
 	public void removeSmallWindow(Context context) {
-		if (smallWindow != null) {
-			WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-			windowManager.removeView(smallWindow);
-			smallWindow = null;
+		if (mFloatView != null) {
+			mWindowManager.removeView(mFloatView);
+			mFloatView = null;
 		}
 	}
 	
 	public boolean isWindowShowing() {
-		return smallWindow != null;
+		return mFloatView != null;
 	}
 	
 	public void updateUsedPercent(int percent) {
-		if (smallWindow != null) {
-			if(!smallWindow.mAnim) {
-				smallWindow.setTextPercent(percent);
+		if (mFloatView != null) {
+			if(!mFloatView.mAnim) {
+				mFloatView.setTextPercent(percent);
 			}
 		}
 	}

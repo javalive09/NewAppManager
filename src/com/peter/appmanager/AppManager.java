@@ -29,7 +29,7 @@ public class AppManager extends Application {
 	
 	public static final int ALL = 1;
 	public static final int SHOW = 2;
-	public static final String SETTING = "setting";
+	public static final String CONFIG = "config";
 	public static final String CLEAN_METHOD = "clean_method";
 	public static final String FLOAT_X = "floatview_x";
 	public static final String FLOAT_Y = "floatview_y";
@@ -71,7 +71,7 @@ public class AppManager extends Application {
 							runningApps.add(info);
 						}
 					}else if(type == SHOW) {
-						boolean show = !context.getSharedPreferences(SETTING, MODE_PRIVATE).getBoolean(info.packageName, false);//默认都显示
+						boolean show = !context.getSharedPreferences(CONFIG, MODE_PRIVATE).getBoolean(info.packageName, false);//默认都显示
 						if(show) {
 							if(!containInfo(runningApps, info)) {
 								runningApps.add(info);
