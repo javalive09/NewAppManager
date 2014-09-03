@@ -29,6 +29,8 @@ public class MyService extends Service {
 
 	public static final String TARGET_PACKAGE_NAME = "com.peter.managerplug";
 	public static final String TARGET_ACTION = "com.peter.managerplug";
+	public static final int FLOATVIEW_HEART_BEAT = 800;
+	public static final int CHECKPLUG_HEART_BEAT = 5000;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -119,7 +121,7 @@ public class MyService extends Service {
 	@Override
 	public void onCreate() {
 		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
-		mHandler.sendEmptyMessageDelayed(0, 5000);
+		mHandler.sendEmptyMessageDelayed(0, CHECKPLUG_HEART_BEAT);
 		showFloatView();
 
 		final String screenoff = getResources().getString(
@@ -133,7 +135,7 @@ public class MyService extends Service {
 	}
 
 	public void showFloatView() {
-		mFloatViewHandler.sendEmptyMessageDelayed(0, 500);
+		mFloatViewHandler.sendEmptyMessageDelayed(0, FLOATVIEW_HEART_BEAT);
 	}
 
 	final BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
@@ -168,7 +170,7 @@ public class MyService extends Service {
 			if (!havePlug) {
 				Toast.makeText(MyService.this, "plug not Running",
 						Toast.LENGTH_SHORT).show();
-				sendEmptyMessageDelayed(0, 5000);
+				sendEmptyMessageDelayed(0, CHECKPLUG_HEART_BEAT);
 			} else {
 				startService(new Intent(TARGET_ACTION));
 			}
@@ -184,7 +186,7 @@ public class MyService extends Service {
 
 			if (!isScreenOff) {
 				floatViewAction();
-				sendEmptyMessageDelayed(0, 500);
+				sendEmptyMessageDelayed(0, FLOATVIEW_HEART_BEAT);
 			}
 
 		};

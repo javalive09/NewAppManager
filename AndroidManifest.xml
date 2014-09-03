@@ -35,7 +35,12 @@
         </activity>
         <activity
             android:name="com.peter.appmanager.SettingActivity"
-            android:label="@string/except" >
+            android:label="@string/except"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.peter.foo" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <service
@@ -51,7 +56,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".RestartReceiver" >
+        <receiver android:name=".RestartReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_RESTARTED" />
 
