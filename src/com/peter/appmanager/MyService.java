@@ -29,7 +29,7 @@ public class MyService extends Service {
 
 	public static final String TARGET_PACKAGE_NAME = "com.peter.managerplug";
 	public static final String TARGET_ACTION = "com.peter.managerplug";
-	public static final int FLOATVIEW_HEART_BEAT = 800;
+	public static final int FLOATVIEW_HEART_BEAT = 500;
 	public static final int CHECKPLUG_HEART_BEAT = 5000;
 
 	@Override
@@ -179,8 +179,7 @@ public class MyService extends Service {
 
 	Handler mFloatViewHandler = new Handler(Looper.getMainLooper()) {
 		public void handleMessage(Message msg) {
-			final String screenoff = getResources().getString(
-					R.string.screenoff_setting);
+			final String screenoff = getResources().getString(R.string.screenoff_setting);
 			boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
 					MODE_PRIVATE).getBoolean(screenoff, false);
 
