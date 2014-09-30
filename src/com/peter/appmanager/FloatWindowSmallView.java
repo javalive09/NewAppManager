@@ -3,9 +3,8 @@ package com.peter.appmanager;
 import java.lang.reflect.Field;
 
 import android.content.Context;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -23,7 +22,9 @@ public class FloatWindowSmallView extends TextView {
 
 	private WindowManager.LayoutParams mParams;
 
-	int mPercent;
+	private int mPercent;
+	
+//	private TextView mTextView;
 	
 	public boolean mAnim = false;
 	
@@ -36,13 +37,14 @@ public class FloatWindowSmallView extends TextView {
 	 * 记录手指按下时在小悬浮窗的View上的纵坐标的值
 	 */
 	private float yInView;
-
+	
+	private Rect mHitRect;
+	
 	public FloatWindowSmallView(final Context context) {
 		super(context);
 		windowManager = (WindowManager) context
 				.getSystemService(Context.WINDOW_SERVICE);
-		setBackgroundResource(R.drawable.bg_small);
-		setGravity(Gravity.CENTER);
+		setBackgroundResource(R.drawable.float_bg);
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		initStatusBarHeight();
 	}
@@ -106,39 +108,81 @@ public class FloatWindowSmallView extends TextView {
 			setEnabled(true);
 		}
 	}
+    
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+    	return super.dispatchTouchEvent(ev);
+    }
+    
+    
 	
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+	}
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
-		super.onTouchEvent(event);
-
+		if(mHitRect == null) {
+			mHitRect = new Rect();
+		}
+		
+		if(mHitRect.isEmpty()) {
+			getHitRect(mHitRect);
+		}
+		
+		final int x = (int) event.getX();
+		final int y = (int) event.getY();
+		
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			pointInView = true;
-			xInView = (int) event.getX();
-			yInView = (int) event.getY();
+			
+			if(mHitRect.contains(x, y)) {
+				pointInView = true;
+			}
+			xInView = x;
+			yInView = y;
 
 			break;
 		case MotionEvent.ACTION_MOVE:
-
-			if (pointInView) {
-				int x = (int) event.getX();
-				int y = (int) event.getY();
-				pointInView = pointInView(x, y, mTouchSlop);
-			} else {
+			
+			Log.i("peter", "move-------x= "+ x +", y= " + y);
+			
+			if(!mHitRect.contains(x, y)) {
+				pointInView = false;
 				float screenX = event.getRawX();
 				float screenY = event.getRawY() - statusBarHeight;
-				Log.i("peter", "move-------");
+				Log.i("peter", "move-------" + y);
 				updateViewPosition(screenX, screenY);
 			}
+			
+			Log.i("peter", " MotionEvent.ACTION_MOVE" + event.getX());
+
 
 			break;
 		case MotionEvent.ACTION_UP:
 			savePosition();
+			break;
+			
+		case MotionEvent.ACTION_CANCEL:
+			Log.i("peter", " MotionEvent.ACTION_CANCEL");
+			break;
+		case MotionEvent.ACTION_OUTSIDE:
+			Log.i("peter", " MotionEvent.ACTION_OUTSIDE");
+			break;
+			
 		}
 
-		return true;
+		return super.onTouchEvent(event);
 	}
+	
+    public boolean performClick() {
+    	if(pointInView) {
+    		return super.performClick();
+    	}
+    	return false;
+    }
 	
 	private void savePosition() {
 		getContext().getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).edit()
