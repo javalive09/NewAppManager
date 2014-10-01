@@ -8,7 +8,6 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
@@ -34,8 +33,8 @@ public class MyWindowManager {
 		params.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
 					| LayoutParams.FLAG_NOT_FOCUSABLE;
 		params.gravity = Gravity.LEFT | Gravity.TOP;
-		params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-		params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+		params.width = DisplayUtil.dip2px(context, 39);
+		params.height = DisplayUtil.dip2px(context, 39);
 		
 		int x = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_x", -1);
 		int y = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_y", -1);
@@ -67,7 +66,7 @@ public class MyWindowManager {
 			mFloatView = new FloatWindowSmallView(context);
 			LayoutParams params = getParams(context);
 			mFloatView.setParams(params);
-			
+			mFloatView.setGravity(Gravity.CENTER);
 			final MyService service = (MyService) context;
 			updateUsedPercent(service.getUsedPercentValue(context));
 			
@@ -81,14 +80,7 @@ public class MyWindowManager {
 
 						@Override
 						protected ArrayList<String> doInBackground(Void... params) {
-							
 							service.killAll();
-
-							try {
-								Thread.sleep(2000);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
 							return null;
 						}
 

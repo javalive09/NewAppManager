@@ -3,7 +3,7 @@
     android:shape="oval" >
 
     <!-- 填充的颜色 -->
-    <solid android:color="#55F0F0F0" />
+    <solid android:color="#414141" />
     
 
      <!--线的宽度，颜色灰色-->

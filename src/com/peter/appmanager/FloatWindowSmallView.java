@@ -6,13 +6,10 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 public class FloatWindowSmallView extends TextView {
-
-	private int mTouchSlop;
 
 	private boolean pointInView;
 
@@ -23,8 +20,6 @@ public class FloatWindowSmallView extends TextView {
 	private WindowManager.LayoutParams mParams;
 
 	private int mPercent;
-	
-//	private TextView mTextView;
 	
 	public boolean mAnim = false;
 	
@@ -42,19 +37,11 @@ public class FloatWindowSmallView extends TextView {
 	
 	public FloatWindowSmallView(final Context context) {
 		super(context);
-		windowManager = (WindowManager) context
-				.getSystemService(Context.WINDOW_SERVICE);
+		windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		setBackgroundResource(R.drawable.float_bg);
-		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		initStatusBarHeight();
 	}
 
-	private boolean pointInView(int x, int y, int slop) {
-		return x >= -slop && y >= -slop
-				&& x < ((getRight() - getLeft()) + slop)
-				&& y < ((getBottom() - getTop()) + slop);
-	}
-	
 	public void setTextPercent(int percent) {
 		mPercent = percent;
 		setText(percent + "%");
@@ -108,27 +95,12 @@ public class FloatWindowSmallView extends TextView {
 			setEnabled(true);
 		}
 	}
-    
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-    	return super.dispatchTouchEvent(ev);
-    }
-    
-    
 	
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-	}
-
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
 		if(mHitRect == null) {
 			mHitRect = new Rect();
-		}
-		
-		if(mHitRect.isEmpty()) {
 			getHitRect(mHitRect);
 		}
 		
@@ -137,7 +109,6 @@ public class FloatWindowSmallView extends TextView {
 		
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			
 			if(mHitRect.contains(x, y)) {
 				pointInView = true;
 			}
