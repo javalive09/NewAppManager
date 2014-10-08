@@ -6,12 +6,13 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 public class FloatWindowSmallView extends TextView {
 
-	private boolean pointInView;
+	private boolean performClick;
 
 	private int statusBarHeight;
 
@@ -23,23 +24,24 @@ public class FloatWindowSmallView extends TextView {
 	
 	public boolean mAnim = false;
 	
+	private int mTouchSlop;
+	
 	/**
 	 * 记录手指按下时在小悬浮窗的View上的横坐标的值
 	 */
-	private float xInView;
+	private int xInView;
 
 	/**
 	 * 记录手指按下时在小悬浮窗的View上的纵坐标的值
 	 */
-	private float yInView;
-	
-	private Rect mHitRect;
+	private int yInView;
 	
 	public FloatWindowSmallView(final Context context) {
 		super(context);
 		windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		setBackgroundResource(R.drawable.float_bg);
 		initStatusBarHeight();
+		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 	}
 
 	public void setTextPercent(int percent) {
@@ -99,19 +101,12 @@ public class FloatWindowSmallView extends TextView {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
-		if(mHitRect == null) {
-			mHitRect = new Rect();
-			getHitRect(mHitRect);
-		}
-		
 		final int x = (int) event.getX();
 		final int y = (int) event.getY();
 		
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			if(mHitRect.contains(x, y)) {
-				pointInView = true;
-			}
+			performClick = true;
 			xInView = x;
 			yInView = y;
 
@@ -120,17 +115,24 @@ public class FloatWindowSmallView extends TextView {
 			
 			Log.i("peter", "move-------x= "+ x +", y= " + y);
 			
-			if(!mHitRect.contains(x, y)) {
-				pointInView = false;
+			if(performClick) {
+				int deltaX = Math.abs(x - xInView);
+				int deltaY = Math.abs(y - yInView);
+				if(deltaX > mTouchSlop || deltaY > mTouchSlop) {
+					performClick = false;
+				}
+			}
+			
+			Log.i("peter", " MotionEvent.ACTION_MOVE" + event.getX());
+			
+			if(!performClick) {
 				float screenX = event.getRawX();
 				float screenY = event.getRawY() - statusBarHeight;
 				Log.i("peter", "move-------" + y);
 				updateViewPosition(screenX, screenY);
+				return true;
 			}
 			
-			Log.i("peter", " MotionEvent.ACTION_MOVE" + event.getX());
-
-
 			break;
 		case MotionEvent.ACTION_UP:
 			savePosition();
@@ -149,7 +151,7 @@ public class FloatWindowSmallView extends TextView {
 	}
 	
     public boolean performClick() {
-    	if(pointInView) {
+    	if(performClick) {
     		return super.performClick();
     	}
     	return false;
