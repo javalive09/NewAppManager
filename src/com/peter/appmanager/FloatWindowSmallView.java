@@ -3,7 +3,6 @@ package com.peter.appmanager;
 import java.lang.reflect.Field;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
