@@ -179,7 +179,12 @@ public class FloatWindowSmallView extends TextView {
 	private void updateViewPosition(float screenX, float screenY) {
 		mParams.x = (int) (screenX - xInView);
 		mParams.y = (int) (screenY - yInView);
-		windowManager.updateViewLayout(this, mParams);
+		
+		try {
+			windowManager.updateViewLayout(this, mParams);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
