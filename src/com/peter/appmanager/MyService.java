@@ -10,6 +10,8 @@ import com.peter.appmanager.AppAdapter.AppInfo;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,6 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,7 +32,7 @@ public class MyService extends Service {
 
 	public static final String TARGET_PACKAGE_NAME = "com.peter.managerplug";
 	public static final String TARGET_ACTION = "com.peter.managerplug";
-	public static final int FLOATVIEW_HEART_BEAT = 500;
+	public static final String ACTION = "com.peter.appmanager";
 	public static final int CHECKPLUG_HEART_BEAT = 5000;
 
 	@Override
@@ -52,11 +55,16 @@ public class MyService extends Service {
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		registerReceiver(screenOffReceiver, filter);
 	}
-
+int count = 0;
+	/**
+	 * 每次都会调用,用于刷新悬浮窗
+	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Toast.makeText(this, "Manager Service onStartCommand()",
-				Toast.LENGTH_SHORT).show();
+//		Toast.makeText(this, "Manager Service onStartCommand()", Toast.LENGTH_SHORT).show();
+		
+		Log.i("peter~~~~~~~~~~~", "count = " + count++);
+		showFloatView();
 		return START_STICKY;
 	}
 
@@ -122,7 +130,6 @@ public class MyService extends Service {
 	public void onCreate() {
 		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
 		mHandler.sendEmptyMessageDelayed(0, CHECKPLUG_HEART_BEAT);
-		showFloatView();
 
 		final String screenoff = getResources().getString(
 				R.string.screenoff_setting);
@@ -131,11 +138,10 @@ public class MyService extends Service {
 		if (isScreenOff) {
 			registerReceiver();
 		}
-
 	}
 
 	public void showFloatView() {
-		mFloatViewHandler.sendEmptyMessageDelayed(0, FLOATVIEW_HEART_BEAT);
+		mFloatViewHandler.sendEmptyMessage(0);
 	}
 
 	final BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
@@ -185,7 +191,6 @@ public class MyService extends Service {
 
 			if (!isScreenOff) {
 				floatViewAction();
-				sendEmptyMessageDelayed(0, FLOATVIEW_HEART_BEAT);
 			}
 
 		};

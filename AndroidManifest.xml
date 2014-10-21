@@ -20,12 +20,13 @@
     <application
         android:name="com.peter.appmanager.AppManager"
         android:allowBackup="true"
-        android:icon="@drawable/session_manager"
+        android:icon="@drawable/setting"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.peter.appmanager.MainActivity"
             android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,8 +46,9 @@
 
         <service
             android:name=".MyService"
-            android:exported="true" >
-            <intent-filter>
+            android:exported="true">
+            <intent-filter
+                android:priority="1000">
                 <action android:name="com.peter.appmanager" />
             </intent-filter>
         </service>

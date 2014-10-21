@@ -9,15 +9,14 @@ import com.peter.appmanager.R;
 import com.peter.appmanager.AppAdapter.AppInfo;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Application;
-import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningAppProcessInfo;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -25,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -41,21 +41,36 @@ public class AppManager extends Application {
 	public void onCreate() {
 		super.onCreate();
 		Toast.makeText(getBaseContext(), "AppManager onCreate()", Toast.LENGTH_LONG).show();
-		final BroadcastReceiver screenOnReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(final Context context, final Intent intent) {
-				
-				String action = intent.getAction();
-				
-				if (Intent.ACTION_SCREEN_ON.equals(action)) {
-					Intent serviceIntent = new Intent(AppManager.this, MyService.class);
-					startService(serviceIntent);
-				}
-			}
-		};
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(Intent.ACTION_SCREEN_ON);
-		registerReceiver(screenOnReceiver, filter);
+		startPollingService(AppManager.this, 2, MyService.class, MyService.ACTION);
+	}
+	
+	//开始轮询服务
+	public void startPollingService(Context context, int seconds, Class<?> cls,String action) {
+		//获取AlarmManager系统服务
+		AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		
+		//包装需要执行Service的Intent
+		Intent intent = new Intent(context, cls);
+		intent.setAction(action);
+		PendingIntent pendingIntent = PendingIntent.getService(context, 0,
+				intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		//触发服务的起始时间
+		long triggerAtTime = SystemClock.elapsedRealtime();
+		
+		//使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
+		manager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtTime, seconds * 1000, pendingIntent);
+	}
+
+	//停止轮询服务
+	public void stopPollingService(Context context, Class<?> cls,String action) {
+		AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(context, cls);
+		intent.setAction(action);
+		PendingIntent pendingIntent = PendingIntent.getService(context, 0,
+				intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		//取消正在执行的服务
+		manager.cancel(pendingIntent);
 	}
 
 	/**
