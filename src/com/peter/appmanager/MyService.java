@@ -82,7 +82,7 @@ public class MyService extends Service {
 	public void kill(ArrayList<String> list) {
 		ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		for (String packageName : list) {
-			manager.killBackgroundProcesses(packageName);
+			manager.restartPackage(packageName);
 			commandLineForceStop(packageName);
 		}
 		commandLineKillAll();

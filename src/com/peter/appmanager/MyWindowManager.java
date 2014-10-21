@@ -36,20 +36,8 @@ public class MyWindowManager {
 		params.width = DisplayUtil.dip2px(context, 39);
 		params.height = DisplayUtil.dip2px(context, 39);
 		
-		int x = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_x", -1);
-		int y = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_y", -1);
-		
-		if(x == -1) {
-			Point outSize = new Point();
-			mWindowManager.getDefaultDisplay().getSize(outSize);
-			x = outSize.x;
-		}
-		
-		if(y == -1) {
-			Point outSize = new Point();
-			mWindowManager.getDefaultDisplay().getSize(outSize);
-			y = outSize.y / 2;
-		}
+		int x = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_x", 0);
+		int y = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_y", 0);
 		
 		params.x = x;
 		params.y = y;

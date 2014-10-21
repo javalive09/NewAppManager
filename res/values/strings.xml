@@ -6,8 +6,9 @@
     <string name="count">已选中0项</string>
     <string name="selectall">全选</string>
     <string name="abselect">反选</string>
-    <string name="kill">kill</string>
+    <string name="kill">clear</string>
     <string name="install_text">安装插件可以使应用永远不会被系统杀死</string>
+    <string name="clear_text">点击按钮清除正在运行的程序</string>
     <string name="install">install</string>
     <string name="uninstall">uninstall</string>
     <string name="action_help">help</string>

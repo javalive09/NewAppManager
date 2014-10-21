@@ -20,7 +20,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -36,11 +35,6 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		getActionBar().setIcon(R.drawable.setting);
-		getActionBar().setHomeButtonEnabled(true);
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -55,55 +49,61 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 				AppManager.CONFIG, MODE_PRIVATE).getAll();
 		appListView.setAdapter(appAdapter);
 		appListView.setOnItemClickListener(this);
-		
-		bindService(new Intent(SettingActivity.this, MyService.class), conn, Context.BIND_AUTO_CREATE);
+
+		bindService(new Intent(SettingActivity.this, MyService.class), conn,
+				Context.BIND_AUTO_CREATE);
 		RadioGroup mRadiogroup = (RadioGroup) findViewById(R.id.cleansetting);
 		final RadioButton screenoffsetting = (RadioButton) findViewById(R.id.screenoffsetting);
 		final RadioButton floatsetting = (RadioButton) findViewById(R.id.floatsetting);
-		final String screenoff = getResources().getString(R.string.screenoff_setting);
-		
-		boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD, MODE_PRIVATE).getBoolean(screenoff, false);
-		if(isScreenOff) {
+		final String screenoff = getResources().getString(
+				R.string.screenoff_setting);
+
+		boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
+				MODE_PRIVATE).getBoolean(screenoff, false);
+		if (isScreenOff) {
 			screenoffsetting.setChecked(true);
-		}else{
+		} else {
 			floatsetting.setChecked(true);
 		}
-		
-		mRadiogroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 
-			@Override
-			public void onCheckedChanged(RadioGroup group, int checkedId) {
-				
-				if(checkedId == screenoffsetting.getId()) {
-					mService.registerReceiver();
-					getSharedPreferences(AppManager.CLEAN_METHOD, MODE_PRIVATE).edit()
-					.putBoolean(screenoff, true).commit();
-				}else if(checkedId == floatsetting.getId()) {
-					mService.unregisterReceiver();
-					getSharedPreferences(AppManager.CLEAN_METHOD, MODE_PRIVATE).edit()
-					.putBoolean(screenoff, false).commit();
-					mService.showFloatView();
-				}
-			}
-			
-		});
+		mRadiogroup
+				.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+						if (checkedId == screenoffsetting.getId()) {
+							mService.registerReceiver();
+							getSharedPreferences(AppManager.CLEAN_METHOD,
+									MODE_PRIVATE).edit()
+									.putBoolean(screenoff, true).commit();
+						} else if (checkedId == floatsetting.getId()) {
+							mService.unregisterReceiver();
+							getSharedPreferences(AppManager.CLEAN_METHOD,
+									MODE_PRIVATE).edit()
+									.putBoolean(screenoff, false).commit();
+							mService.showFloatView();
+						}
+					}
+
+				});
 	}
-	
-    private ServiceConnection conn = new ServiceConnection() {
-        
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        	
-        }
-        
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MyBinder binder = (MyBinder)service;
-            mService = binder.getService();
-        }
 
-    };
-    
+	private ServiceConnection conn = new ServiceConnection() {
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			MyBinder binder = (MyBinder) service;
+			mService = binder.getService();
+		}
+
+	};
+
 	@Override
 	protected void onResume() {
 		reloadData();
@@ -114,16 +114,6 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 	protected void onDestroy() {
 		unbindService(conn);
 		super.onDestroy();
-	}
-
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			finish();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
 	}
 
 	public void onClick(View v) {
@@ -142,50 +132,50 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 	}
 
 	File file = null;
-	
+
 	public void saveToSDCard(String sdcardFileName) {
 
 		FileOutputStream fos = null;
 		InputStream is = null;
-		
-		file = new File(Environment.getExternalStorageDirectory(), sdcardFileName);
-		
-//		if(!file.exists()) {
-			try {
-				is = getResources().getAssets().open("NewAppManagerPlug.apk");
-				
-				fos = new FileOutputStream(file);
-				
-				byte[] buffer = new byte[4096];
-				
-				int byteCount = 0;
-				while((byteCount = is.read(buffer)) != -1) {
-					fos.write(buffer, 0, byteCount);;
-				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					if(is != null) {
-						is.close();
-					}
-					if(fos != null) {
-						fos.close();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+
+		file = new File(Environment.getExternalStorageDirectory(),
+				sdcardFileName);
+
+		try {
+			is = getResources().getAssets().open("NewAppManagerPlug.apk");
+
+			fos = new FileOutputStream(file);
+
+			byte[] buffer = new byte[4096];
+
+			int byteCount = 0;
+			while ((byteCount = is.read(buffer)) != -1) {
+				fos.write(buffer, 0, byteCount);
+				;
 			}
-//		}
-		
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (is != null) {
+					is.close();
+				}
+				if (fos != null) {
+					fos.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 	}
 
 	private void installPlug() {
 		String fileName = file.getAbsolutePath();
 		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setDataAndType(Uri.fromFile(new File(fileName)), "application/vnd.android.package-archive");
+		intent.setDataAndType(Uri.fromFile(new File(fileName)),
+				"application/vnd.android.package-archive");
 		startActivity(intent);
 	}
 
@@ -201,18 +191,19 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		//反选
+		// 反选
 		ViewCache viewCache = (ViewCache) view.getTag();
 		viewCache.app_CheckBox.toggle();// 反选
 		Boolean isChecked = viewCache.app_CheckBox.isChecked();
-		
-		//更新值
+
+		// 更新值
 		@SuppressWarnings("unchecked")
-		AppAdapter<AppInfo> adapter = ((AppAdapter<AppInfo>) parent.getAdapter());
+		AppAdapter<AppInfo> adapter = ((AppAdapter<AppInfo>) parent
+				.getAdapter());
 		AppInfo info = (AppInfo) adapter.getItem(position);
-		
+
 		adapter.isSelected.put(info.packageName, isChecked);
-		
+
 		getSharedPreferences(AppManager.CONFIG, MODE_PRIVATE).edit()
 				.putBoolean(viewCache.info.packageName, isChecked).commit();
 	}

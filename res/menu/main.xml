@@ -14,8 +14,6 @@
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="3"
-        android:icon="@drawable/setting"
-        android:showAsAction="always"
         android:title="@string/action_settings"/>
     <item
         android:id="@+id/action_feedback"

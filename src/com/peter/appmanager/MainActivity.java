@@ -117,8 +117,6 @@ public class MainActivity extends Activity implements OnItemClickListener,
 
 			break;
 		case R.id.action_feedback:
-			AppManager application = (AppManager) getApplication();
-			application.getRecentTask();
 			break;
 		case R.id.action_settings:
 			startActivity(new Intent(MainActivity.this, SettingActivity.class));

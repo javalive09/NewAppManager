@@ -13,8 +13,11 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Application;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -38,6 +41,21 @@ public class AppManager extends Application {
 	public void onCreate() {
 		super.onCreate();
 		Toast.makeText(getBaseContext(), "AppManager onCreate()", Toast.LENGTH_LONG).show();
+		final BroadcastReceiver screenOnReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(final Context context, final Intent intent) {
+				
+				String action = intent.getAction();
+				
+				if (Intent.ACTION_SCREEN_ON.equals(action)) {
+					Intent serviceIntent = new Intent(AppManager.this, MyService.class);
+					startService(serviceIntent);
+				}
+			}
+		};
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_SCREEN_ON);
+		registerReceiver(screenOnReceiver, filter);
 	}
 
 	/**
@@ -141,15 +159,6 @@ public class AppManager extends Application {
 			}
 		}
 		return false;
-	}
-	
-	public void getRecentTask() {
-		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-		List<RecentTaskInfo> task = mActivityManager.getRecentTasks(Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
-		for(RecentTaskInfo info : task) {
-			Log.i("peter", info.baseIntent.getComponent().getPackageName());
-			invokeMethod("removeTask", mActivityManager, new Class[]{int.class, int.class}, new Object[]{info.id, 1});
-		}
 	}
 	
     public void  invokeMethod(String MethodName,Object o, Class<?>[] c, Object []paras){

@@ -18,27 +18,34 @@
         android:scrollbarStyle="outsideInset"
         android:scrollingCache="false" />
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:gravity="center"
+        android:text="@string/clear_text" />
+
     <FrameLayout
         android:layout_width="fill_parent"
-        android:layout_height="100dp" 
-        android:background="@android:color/black">
+        android:layout_height="wrap_content" 
+        android:padding="5dp">
 
         <Button
             android:id="@+id/kill"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
             android:onClick="onClick"
-            android:background="@layout/button_bg"
-            android:text="@string/kill" 
-            android:layout_gravity="center"/>
+            android:text="@string/kill" />
 
         <ProgressBar
             android:id="@+id/pb"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="invisible"/>
+            android:visibility="invisible" />
     </FrameLayout>
 
 </LinearLayout>

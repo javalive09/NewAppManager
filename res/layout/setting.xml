@@ -70,30 +70,27 @@
         android:gravity="center"
         android:text="@string/install_text" />
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="100dp"
-        android:background="@android:color/black" >
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/install"
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
+            android:layout_weight="1.0"
             android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:layout_marginLeft="30dp"
-            android:background="@layout/button_bg"
             android:onClick="onClick"
             android:text="@string/install" />
 
         <Button
             android:id="@+id/uninstall"
-            android:layout_width="wrap_content"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="30dp"
-            android:background="@layout/button_bg"
+            android:layout_weight="1.0"
             android:onClick="onClick"
             android:text="@string/uninstall" />
-    </FrameLayout>
+    </LinearLayout>
 
 </LinearLayout>
