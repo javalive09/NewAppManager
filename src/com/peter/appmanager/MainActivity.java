@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import com.peter.appmanager.R;
 import com.peter.appmanager.AppAdapter.AppInfo;
@@ -17,22 +18,27 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class MainActivity extends Activity implements OnItemClickListener,
+public class MainActivity extends Activity implements OnItemClickListener, OnItemLongClickListener,
 		OnClickListener {
 
 	private AlertDialog mDialog = null;
@@ -88,6 +94,7 @@ public class MainActivity extends Activity implements OnItemClickListener,
 		mPb.setVisibility(View.INVISIBLE);
 		appListView.setAdapter(appAdapter);
 		appListView.setOnItemClickListener(this);
+		appListView.setOnItemLongClickListener(this);
 		selectAll(true);
 	}
 
@@ -255,4 +262,43 @@ public class MainActivity extends Activity implements OnItemClickListener,
 		}.execute();
 	}
 
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view,
+			int position, long id) {
+		AppInfo info = (AppInfo) appAdapter.getItem(position);
+		showForceStopView(info.packageName);
+		return false;
+	}
+	
+	public void showForceStopView(String packageName) {
+		int version = Build.VERSION.SDK_INT;
+		Intent intent = new Intent();
+		if(version >= 9) {
+//			if(isMiUI()) {
+//				intent.setAction("miui.intent.action.APP_PERM_EDITOR");
+//				intent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.AppPermissionsEditorActivity");
+//				intent.putExtra("extra_pkgname", packageName);
+//			}else {
+				intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+				Uri uri = Uri.fromParts("package", packageName, null);  
+				intent.setData(uri);
+//			}
+		}else {
+			final String appPkgName = "pkg";  
+	        intent.setAction(Intent.ACTION_VIEW);  
+	        intent.setClassName("com.android.settings",
+	        		"com.android.settings.InstalledAppDetails");  
+	        intent.putExtra(appPkgName, packageName);  
+		}
+		startActivity(intent);  
+	}
+	
+	private boolean isMiUI() {
+		String str = SystemProperties.get("ro.miui.ui.version.name", "unkonw");
+	    if ((str.equalsIgnoreCase("V5")) || (str.equalsIgnoreCase("V6"))) {
+	      return true;
+	    }
+	    return false;
+	}
+	
 }
