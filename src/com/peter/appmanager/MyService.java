@@ -163,9 +163,17 @@ int count = 0;
 	@Override
 	public void onDestroy() {
 		Toast.makeText(this, "Manager Service onDestroy()", Toast.LENGTH_SHORT).show();
-		unregisterReceiver();
 		Intent intent = new Intent(getApplicationContext(), MyService.class);
 		startService(intent);
+		
+		final String screenoff = getResources().getString(
+				R.string.screenoff_setting);
+		boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
+				MODE_PRIVATE).getBoolean(screenoff, false);
+		if (isScreenOff) {
+			unregisterReceiver();
+		}
+		
 	}
 
 	Handler mHandler = new Handler(Looper.getMainLooper()) {
