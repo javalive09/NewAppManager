@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.regex.Pattern;
-
 import com.peter.appmanager.R;
 import com.peter.appmanager.AppAdapter.AppInfo;
 import com.peter.appmanager.AppAdapter.ViewCache;
@@ -24,7 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;

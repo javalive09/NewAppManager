@@ -34,6 +34,7 @@ public class MyService extends Service {
 	public static final String TARGET_ACTION = "com.peter.managerplug";
 	public static final String ACTION = "com.peter.appmanager";
 	public static final int CHECKPLUG_HEART_BEAT = 5000;
+	public static boolean isFirstStart = true;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -55,7 +56,8 @@ public class MyService extends Service {
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		registerReceiver(screenOffReceiver, filter);
 	}
-int count = 0;
+	
+	int count = 0;
 	/**
 	 * 每次都会调用,用于刷新悬浮窗
 	 */
@@ -128,6 +130,11 @@ int count = 0;
 
 	@Override
 	public void onCreate() {
+		if(isFirstStart) {
+			isFirstStart = false;
+			startPollingService(MyService.this, 2, MyService.class, MyService.ACTION);
+		}
+		
 		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
 		mHandler.sendEmptyMessageDelayed(0, CHECKPLUG_HEART_BEAT);
 
@@ -138,6 +145,35 @@ int count = 0;
 		if (isScreenOff) {
 			registerReceiver();
 		}
+	}
+	
+	//开始轮询服务
+	public void startPollingService(Context context, int seconds, Class<?> cls,String action) {
+		//获取AlarmManager系统服务
+		AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		
+		//包装需要执行Service的Intent
+		Intent intent = new Intent(context, cls);
+		intent.setAction(action);
+		PendingIntent pendingIntent = PendingIntent.getService(context, 0,
+				intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		//触发服务的起始时间
+		long triggerAtTime = SystemClock.elapsedRealtime();
+		
+		//使用AlarmManger的setRepeating方法设置定期执行的时间间隔（seconds秒）和需要执行的Service
+		manager.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtTime, seconds * 1000, pendingIntent);
+	}
+
+	//停止轮询服务
+	public void stopPollingService(Context context, Class<?> cls,String action) {
+		AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(context, cls);
+		intent.setAction(action);
+		PendingIntent pendingIntent = PendingIntent.getService(context, 0,
+				intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		//取消正在执行的服务
+		manager.cancel(pendingIntent);
 	}
 
 	public void showFloatView() {
