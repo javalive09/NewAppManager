@@ -25,8 +25,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.peter.appmanager.MainActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
+            android:configChanges="keyboardHidden|orientation"
+            android:screenOrientation="portrait"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -58,13 +58,13 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".RestartReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_RESTARTED" />
+<!--         <receiver android:name=".RestartReceiver"> -->
+<!--             <intent-filter> -->
+<!--                 <action android:name="android.intent.action.PACKAGE_RESTARTED" /> -->
 
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
+<!--                 <data android:scheme="package" /> -->
+<!--             </intent-filter> -->
+<!--         </receiver> -->
     </application>
 
 </manifest>

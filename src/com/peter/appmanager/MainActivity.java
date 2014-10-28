@@ -3,6 +3,7 @@ package com.peter.appmanager;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 import com.peter.appmanager.R;
@@ -11,17 +12,20 @@ import com.peter.appmanager.AppAdapter.ViewCache;
 import com.peter.appmanager.MyService.MyBinder;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,6 +55,11 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 		Intent intent = new Intent(MainActivity.this, MyService.class);
 		startService(intent);
 		bindService(intent, conn, Context.BIND_AUTO_CREATE);
+		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+		filter.addDataScheme("package");
+		registerReceiver(forceStopReceiver, filter);
 	}
 
 	private ServiceConnection conn = new ServiceConnection() {
@@ -66,9 +75,27 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 		}
 	};
 
+    BroadcastReceiver forceStopReceiver = new BroadcastReceiver() {
+    	@Override
+    	public void onReceive(Context context, Intent intent) {
+    		ActivityManager activityManager = (ActivityManager)(context.getSystemService(android.content.Context.ACTIVITY_SERVICE )) ;  
+    		List<RunningTaskInfo> runningTaskInfos = activityManager.getRunningTasks(1) ;
+    		if(runningTaskInfos != null) {
+	    		String baseActivity = runningTaskInfos.get(0).baseActivity.getClassName();
+	    		if(baseActivity != null) {
+	    			String name = MainActivity.class.getName();
+		    		if(name.equals(baseActivity)) {
+		    			finishSetting(baseActivity);
+		    		}
+	    		}
+    		}
+    	}
+    };
+	
 	@Override
 	protected void onDestroy() {
 		unbindService(conn);
+		unregisterReceiver(forceStopReceiver);
 		super.onDestroy();
 	}
 
@@ -290,12 +317,20 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 		startActivity(intent);  
 	}
 	
-	private boolean isMiUI() {
-		String str = SystemProperties.get("ro.miui.ui.version.name", "unkonw");
-	    if ((str.equalsIgnoreCase("V5")) || (str.equalsIgnoreCase("V6"))) {
-	      return true;
-	    }
-	    return false;
+//	private boolean isMiUI() {
+//		String str = SystemProperties.get("ro.miui.ui.version.name", "unkonw");
+//	    if ((str.equalsIgnoreCase("V5")) || (str.equalsIgnoreCase("V6"))) {
+//	      return true;
+//	    }
+//	    return false;
+//	}
+
+	private void finishSetting(String baseActivity) {
+		Intent in = new Intent();
+		in.setClassName(MainActivity.this, baseActivity);
+		in.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(in);
 	}
 	
 }
