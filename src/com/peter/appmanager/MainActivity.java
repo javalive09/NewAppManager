@@ -283,10 +283,10 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 		}else {
 			final String appPkgName = "pkg";  
 	        intent.setAction(Intent.ACTION_VIEW);  
-	        intent.setClassName("com.android.settings",
-	        		"com.android.settings.InstalledAppDetails");  
+	        intent.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");  
 	        intent.putExtra(appPkgName, packageName);  
 		}
+//		intent.addFlags(0x10008000);
 		startActivity(intent);  
 	}
 	
