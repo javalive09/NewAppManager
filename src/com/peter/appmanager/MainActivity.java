@@ -78,16 +78,8 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     BroadcastReceiver forceStopReceiver = new BroadcastReceiver() {
     	@Override
     	public void onReceive(Context context, Intent intent) {
-    		ActivityManager activityManager = (ActivityManager)(context.getSystemService(android.content.Context.ACTIVITY_SERVICE )) ;  
-    		List<RunningTaskInfo> runningTaskInfos = activityManager.getRunningTasks(1) ;
-    		if(runningTaskInfos != null) {
-	    		String baseActivity = runningTaskInfos.get(0).baseActivity.getClassName();
-	    		if(baseActivity != null) {
-	    			String name = MainActivity.class.getName();
-		    		if(name.equals(baseActivity)) {
-		    			finishSetting(baseActivity);
-		    		}
-	    		}
+    		if(isClearBaseActivity()) {
+		    	finishSetting();
     		}
     	}
     };
@@ -313,7 +305,6 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 	        intent.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");  
 	        intent.putExtra(appPkgName, packageName);  
 		}
-//		intent.addFlags(0x10008000);
 		startActivity(intent);  
 	}
 	
@@ -324,10 +315,19 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 //	    }
 //	    return false;
 //	}
+	
+    private boolean isClearBaseActivity() {
+    	ActivityManager activityManager = (ActivityManager)(getSystemService(android.content.Context.ACTIVITY_SERVICE )) ;  
+		List<RunningTaskInfo> runningTaskInfos = activityManager.getRunningTasks(1) ;
+		String packageName = getPackageName();
+		String secPackageName = runningTaskInfos.get(0).baseActivity.getPackageName();
+		return packageName.equals(secPackageName);
+    }
 
-	private void finishSetting(String baseActivity) {
+
+	private void finishSetting() {
 		Intent in = new Intent();
-		in.setClassName(MainActivity.this, baseActivity);
+		in.setClass(MainActivity.this, MainActivity.class);
 		in.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(in);
