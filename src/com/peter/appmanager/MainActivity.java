@@ -26,6 +26,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +49,8 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 	private ProgressBar mPb = null;
 	private Button mKill = null;
 	private MyService mService = null;
+	private boolean showForceStopView = false;
+	private String forecStopPackageName = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -78,8 +82,14 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
     BroadcastReceiver forceStopReceiver = new BroadcastReceiver() {
     	@Override
     	public void onReceive(Context context, Intent intent) {
-    		if(isClearBaseActivity()) {
-		    	finishSetting();
+    		Uri data = intent.getData();
+    		if(data != null) {
+	    		String str = data.getSchemeSpecificPart();
+	    		if(!TextUtils.isEmpty(forecStopPackageName) && !TextUtils.isEmpty(str)
+	    				&& str.equals(forecStopPackageName) && showForceStopView) {
+	    			finishSetting();
+	    		}
+	    		Log.i("~peter", "str =" + str);
     		}
     	}
     };
@@ -98,6 +108,7 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 	}
 
 	private void relodData() {
+		showForceStopView = false;
 		setContentView(R.layout.main);
 		AppManager application = (AppManager) getApplication();
 		appAdapter = new AppAdapter<AppInfo>(MainActivity.this,
@@ -287,6 +298,8 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 	}
 	
 	public void showForceStopView(String packageName) {
+		showForceStopView = true;
+		forecStopPackageName = packageName;
 		int version = Build.VERSION.SDK_INT;
 		Intent intent = new Intent();
 		if(version >= 9) {
@@ -316,14 +329,6 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 //	    return false;
 //	}
 	
-    private boolean isClearBaseActivity() {
-    	ActivityManager activityManager = (ActivityManager)(getSystemService(android.content.Context.ACTIVITY_SERVICE )) ;  
-		List<RunningTaskInfo> runningTaskInfos = activityManager.getRunningTasks(1) ;
-		String packageName = getPackageName();
-		String secPackageName = runningTaskInfos.get(0).baseActivity.getPackageName();
-		return packageName.equals(secPackageName);
-    }
-
 
 	private void finishSetting() {
 		Intent in = new Intent();
