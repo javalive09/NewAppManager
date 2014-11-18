@@ -30,9 +30,6 @@ public class AppManager extends Application {
 	public static final int SHOW = 2;
 	public static final String CONFIG = "config";
 	public static final String CLEAN_METHOD = "clean_method";
-	public static final String FLOAT_X = "floatview_x";
-	public static final String FLOAT_Y = "floatview_y";
-	public static final String TARGET_PACKAGE_NAME = "com.peter.managerplug";
 	
 	@Override
 	public void onCreate() {
@@ -60,7 +57,7 @@ public class AppManager extends Application {
 			for(ApplicationInfo applicationInfo: infos) {
 				if(applicationInfo != null && !isSystemApp(applicationInfo) 
 						&& !applicationInfo.packageName.equals(topPackage)
-						&& !applicationInfo.packageName.equals(TARGET_PACKAGE_NAME)) {
+						&& !applicationInfo.packageName.equals("com.peter.managerplug")) {
 					AppInfo info = new AppInfo();
 					info.packageName = applicationInfo.packageName;
 					BitmapDrawable bitmapDrawable = (BitmapDrawable) applicationInfo.loadIcon(pm);
@@ -117,7 +114,7 @@ public class AppManager extends Application {
     }
 	
 	private Drawable getRightSizeIcon(BitmapDrawable drawable) {
-		Drawable rightDrawable = getResources().getDrawable(R.drawable.session_manager);
+		Drawable rightDrawable = getResources().getDrawable(R.drawable.ic_launcher);
 		int rightSize = rightDrawable.getIntrinsicWidth();
 		Bitmap bitmap = drawable.getBitmap();
 		int width = bitmap.getWidth();

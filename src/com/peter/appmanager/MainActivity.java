@@ -41,15 +41,14 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class MainActivity extends Activity implements OnItemClickListener, OnItemLongClickListener,
-		OnClickListener {
+public class MainActivity extends Activity implements OnItemClickListener,
+		OnItemLongClickListener, OnClickListener {
 
 	private AlertDialog mDialog = null;
 	private AppAdapter<AppInfo> appAdapter = null;
 	private ProgressBar mPb = null;
 	private Button mKill = null;
 	private MyService mService = null;
-	private boolean showForceStopView = false;
 	private String forecStopPackageName = null;
 
 	@Override
@@ -59,11 +58,6 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 		Intent intent = new Intent(MainActivity.this, MyService.class);
 		startService(intent);
 		bindService(intent, conn, Context.BIND_AUTO_CREATE);
-		
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-		filter.addDataScheme("package");
-		registerReceiver(forceStopReceiver, filter);
 	}
 
 	private ServiceConnection conn = new ServiceConnection() {
@@ -74,30 +68,31 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			MyBinder binder = (MyBinder)service;
-            mService = binder.getService();
+			MyBinder binder = (MyBinder) service;
+			mService = binder.getService();
 		}
 	};
 
-    BroadcastReceiver forceStopReceiver = new BroadcastReceiver() {
-    	@Override
-    	public void onReceive(Context context, Intent intent) {
-    		Uri data = intent.getData();
-    		if(data != null) {
-	    		String str = data.getSchemeSpecificPart();
-	    		if(!TextUtils.isEmpty(forecStopPackageName) && !TextUtils.isEmpty(str)
-	    				&& str.equals(forecStopPackageName) && showForceStopView) {
-	    			finishSetting();
-	    		}
-	    		Log.i("~peter", "str =" + str);
-    		}
-    	}
-    };
-	
+	BroadcastReceiver forceStopReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Uri data = intent.getData();
+			if (data != null) {
+				String str = data.getSchemeSpecificPart();
+				if (!TextUtils.isEmpty(forecStopPackageName)
+						&& !TextUtils.isEmpty(str)
+						&& str.equals(forecStopPackageName)) {
+					finishSetting();
+					unregisterReceiver(forceStopReceiver);
+				}
+				Log.i("~peter", "str =" + str);
+			}
+		}
+	};
+
 	@Override
 	protected void onDestroy() {
 		unbindService(conn);
-		unregisterReceiver(forceStopReceiver);
 		new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
 
 			@Override
@@ -116,7 +111,6 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 	}
 
 	private void relodData() {
-		showForceStopView = false;
 		setContentView(R.layout.main);
 		AppManager application = (AppManager) getApplication();
 		appAdapter = new AppAdapter<AppInfo>(MainActivity.this,
@@ -304,46 +298,35 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 		showForceStopView(info.packageName);
 		return false;
 	}
-	
+
 	public void showForceStopView(String packageName) {
-		showForceStopView = true;
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+		filter.addDataScheme("package");
+		registerReceiver(forceStopReceiver, filter);
 		forecStopPackageName = packageName;
 		int version = Build.VERSION.SDK_INT;
 		Intent intent = new Intent();
-		if(version >= 9) {
-//			if(isMiUI()) {
-//				intent.setAction("miui.intent.action.APP_PERM_EDITOR");
-//				intent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.AppPermissionsEditorActivity");
-//				intent.putExtra("extra_pkgname", packageName);
-//			}else {
-				intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
-				Uri uri = Uri.fromParts("package", packageName, null);  
-				intent.setData(uri);
-//			}
-		}else {
-			final String appPkgName = "pkg";  
-	        intent.setAction(Intent.ACTION_VIEW);  
-	        intent.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");  
-	        intent.putExtra(appPkgName, packageName);  
+		if (version >= 9) {
+			intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+			Uri uri = Uri.fromParts("package", packageName, null);
+			intent.setData(uri);
+		} else {
+			final String appPkgName = "pkg";
+			intent.setAction(Intent.ACTION_VIEW);
+			intent.setClassName("com.android.settings",
+					"com.android.settings.InstalledAppDetails");
+			intent.putExtra(appPkgName, packageName);
 		}
-		startActivity(intent);  
+		startActivity(intent);
 	}
-	
-//	private boolean isMiUI() {
-//		String str = SystemProperties.get("ro.miui.ui.version.name", "unkonw");
-//	    if ((str.equalsIgnoreCase("V5")) || (str.equalsIgnoreCase("V6"))) {
-//	      return true;
-//	    }
-//	    return false;
-//	}
-	
 
 	private void finishSetting() {
 		Intent in = new Intent();
 		in.setClass(MainActivity.this, MainActivity.class);
-		in.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//确保finish掉setting
+		in.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);//确保MainActivity不被finish掉
 		startActivity(in);
 	}
-	
+
 }

@@ -14,11 +14,10 @@ public class MyWindowManager {
 	
 	private static MyWindowManager mManager = new MyWindowManager();
 	private FloatWindowSmallView mFloatView;
-	private WindowManager mWindowManager;
 
 	private MyWindowManager() {}
 	
-	public static MyWindowManager getInstance() {
+	public static MyWindowManager instance() {
 		return mManager;
 	}
 	
@@ -30,8 +29,8 @@ public class MyWindowManager {
 		params.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
 					| LayoutParams.FLAG_NOT_FOCUSABLE;
 		params.gravity = Gravity.LEFT | Gravity.TOP;
-		params.width = DisplayUtil.dip2px(context, 39);
-		params.height = DisplayUtil.dip2px(context, 39);
+		params.width = dip2px(context, 39);
+		params.height = dip2px(context, 39);
 		
 		int x = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_x", 0);
 		int y = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_y", 0);
@@ -42,10 +41,13 @@ public class MyWindowManager {
 		return params;
 	}
 	
+	private int dip2px(Context context, float dipValue) {
+		final float scale = context.getResources().getDisplayMetrics().density;
+		return (int) (dipValue * scale + 0.5f);
+	}
+	
 	public void createSmallWindow(final Context context) {
-		if(mWindowManager == null) {
-			mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-		}
+		WindowManager mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		
 		if (mFloatView == null) {
 			mFloatView = new FloatWindowSmallView(context);
@@ -87,6 +89,7 @@ public class MyWindowManager {
 	
 	public void removeSmallWindow(Context context) {
 		if (mFloatView != null) {
+			WindowManager mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 			mWindowManager.removeView(mFloatView);
 			mFloatView = null;
 		}

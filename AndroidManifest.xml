@@ -45,8 +45,8 @@
         </activity>
 
         <service
-            android:name=".MyService"
-            android:exported="true">
+            android:exported="true"
+            android:name=".MyService">
             <intent-filter
                 android:priority="1000">
                 <action android:name="com.peter.appmanager" />

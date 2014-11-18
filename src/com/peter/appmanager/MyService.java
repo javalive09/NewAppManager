@@ -32,8 +32,7 @@ public class MyService extends Service {
 
 	public static final String TARGET_ACTION = "com.peter.managerplug";
 	public static final String ACTION = "com.peter.appmanager";
-	public static final int CHECKPLUG_HEART_BEAT = 5000;
-	public static boolean isRollingStart = false;
+	private static boolean isRollingStart = false;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -132,7 +131,7 @@ public class MyService extends Service {
 			startPollingService(MyService.this, 5, MyService.class, MyService.ACTION);
 		}
 		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
-		mHandler.sendEmptyMessageDelayed(0, CHECKPLUG_HEART_BEAT);
+		mHandler.sendEmptyMessageDelayed(0, 5000);
 		registerReceiver();
 	}
 	
@@ -214,7 +213,7 @@ public class MyService extends Service {
 			if (!havePlug) {
 				Toast.makeText(MyService.this, "plug not Running",
 						Toast.LENGTH_SHORT).show();
-				sendEmptyMessageDelayed(0, CHECKPLUG_HEART_BEAT);
+				sendEmptyMessageDelayed(0, 5000);
 			} else {
 				startService(new Intent(TARGET_ACTION));
 			}
@@ -236,16 +235,16 @@ public class MyService extends Service {
 
 	private void floatViewAction() {
 		// 当前界面是桌面，且没有悬浮窗显示，则创建悬浮窗。
-		if (isHome() && !MyWindowManager.getInstance().isWindowShowing()) {
-			MyWindowManager.getInstance().createSmallWindow(MyService.this);
+		if (isHome() && !MyWindowManager.instance().isWindowShowing()) {
+			MyWindowManager.instance().createSmallWindow(MyService.this);
 		}
 		// 当前界面不是桌面，且有悬浮窗显示，则移除悬浮窗。
-		else if (!isHome() && MyWindowManager.getInstance().isWindowShowing()) {
-			MyWindowManager.getInstance().removeSmallWindow(MyService.this);
+		else if (!isHome() && MyWindowManager.instance().isWindowShowing()) {
+			MyWindowManager.instance().removeSmallWindow(MyService.this);
 		}
 		// 当前界面是桌面，且有悬浮窗显示，则更新内存数据。
-		else if (isHome() && MyWindowManager.getInstance().isWindowShowing()) {
-			MyWindowManager.getInstance().updateUsedPercent(getUsedPercentValue(MyService.this));
+		else if (isHome() && MyWindowManager.instance().isWindowShowing()) {
+			MyWindowManager.instance().updateUsedPercent(getUsedPercentValue(MyService.this));
 		}
 	}
 	

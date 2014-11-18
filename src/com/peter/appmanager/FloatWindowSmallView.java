@@ -15,8 +15,6 @@ public class FloatWindowSmallView extends TextView {
 
 	private int statusBarHeight;
 
-	private WindowManager windowManager;
-
 	private WindowManager.LayoutParams mParams;
 
 	private int mPercent;
@@ -37,7 +35,6 @@ public class FloatWindowSmallView extends TextView {
 	
 	public FloatWindowSmallView(final Context context) {
 		super(context);
-		windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		setBackgroundResource(R.drawable.float_bg);
 		initStatusBarHeight();
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -120,11 +117,7 @@ public class FloatWindowSmallView extends TextView {
 				if(deltaX > mTouchSlop || deltaY > mTouchSlop) {
 					performClick = false;
 				}
-			}
-			
-			Log.i("peter", " MotionEvent.ACTION_MOVE" + event.getX());
-			
-			if(!performClick) {
+			}else {
 				float screenX = event.getRawX();
 				float screenY = event.getRawY() - statusBarHeight;
 				Log.i("peter", "move-------" + y);
@@ -135,6 +128,7 @@ public class FloatWindowSmallView extends TextView {
 			break;
 		case MotionEvent.ACTION_UP:
 			savePosition();
+			performClick();
 			break;
 			
 		case MotionEvent.ACTION_CANCEL:
@@ -181,6 +175,7 @@ public class FloatWindowSmallView extends TextView {
 		mParams.y = (int) (screenY - yInView);
 		
 		try {
+			WindowManager windowManager = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
 			windowManager.updateViewLayout(this, mParams);
 		} catch (Exception e) {
 			e.printStackTrace();
