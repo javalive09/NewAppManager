@@ -30,11 +30,10 @@ import android.widget.Toast;
 
 public class MyService extends Service {
 
-	public static final String TARGET_PACKAGE_NAME = "com.peter.managerplug";
 	public static final String TARGET_ACTION = "com.peter.managerplug";
 	public static final String ACTION = "com.peter.appmanager";
 	public static final int CHECKPLUG_HEART_BEAT = 5000;
-	public static boolean isFirstStart = true;
+	public static boolean isRollingStart = false;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -48,25 +47,23 @@ public class MyService extends Service {
 	}
 
 	public void unregisterReceiver() {
-		unregisterReceiver(screenOffReceiver);
+		unregisterReceiver(screenReceiver);
 	}
 
 	public void registerReceiver() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
-		registerReceiver(screenOffReceiver, filter);
+		filter.addAction(Intent.ACTION_SCREEN_ON);
+		registerReceiver(screenReceiver, filter);
 	}
 	
-	int count = 0;
 	/**
 	 * 每次都会调用,用于刷新悬浮窗
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-//		Toast.makeText(this, "Manager Service onStartCommand()", Toast.LENGTH_SHORT).show();
-		
-		Log.i("peter~~~~~~~~~~~", "count = " + count++);
 		showFloatView();
+		Log.i("peter", "=============");
 		return START_STICKY;
 	}
 
@@ -130,21 +127,13 @@ public class MyService extends Service {
 
 	@Override
 	public void onCreate() {
-		if(isFirstStart) {
-			isFirstStart = false;
-			startPollingService(MyService.this, 2, MyService.class, MyService.ACTION);
+		if(!isRollingStart) {
+			isRollingStart = true;
+			startPollingService(MyService.this, 5, MyService.class, MyService.ACTION);
 		}
-		
 		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
 		mHandler.sendEmptyMessageDelayed(0, CHECKPLUG_HEART_BEAT);
-
-		final String screenoff = getResources().getString(
-				R.string.screenoff_setting);
-		boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
-				MODE_PRIVATE).getBoolean(screenoff, false);
-		if (isScreenOff) {
-			registerReceiver();
-		}
+		registerReceiver();
 	}
 	
 	//开始轮询服务
@@ -180,17 +169,30 @@ public class MyService extends Service {
 		mFloatViewHandler.sendEmptyMessage(0);
 	}
 
-	final BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
+	final BroadcastReceiver screenReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(final Context context, final Intent intent) {
 
-			String action = intent.getAction();
-
-			if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-				int percent = getUsedPercentValue(context);
-				Toast.makeText(context, "available memery rate =" + percent + "%", Toast.LENGTH_LONG).show();
-				if (percent > 80) {
-					killAll();
+			if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+				final String screenoff = getResources().getString(R.string.screenoff_setting);
+				boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
+						MODE_PRIVATE).getBoolean(screenoff, false);
+				if(isScreenOff) {
+					int percent = getUsedPercentValue(context);
+					Toast.makeText(context, "available memery rate =" + percent + "%", Toast.LENGTH_LONG).show();
+					if (percent > 80) {
+						killAll();
+					}
+				}
+				
+				if(isRollingStart) {
+					isRollingStart = false;
+					stopPollingService(MyService.this, MyService.class, MyService.ACTION);
+				}
+			}else if(Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
+				if(!isRollingStart) {
+					isRollingStart = true;
+					startPollingService(MyService.this, 5, MyService.class, MyService.ACTION);
 				}
 			}
 		}
@@ -201,15 +203,7 @@ public class MyService extends Service {
 		Toast.makeText(this, "Manager Service onDestroy()", Toast.LENGTH_SHORT).show();
 		Intent intent = new Intent(getApplicationContext(), MyService.class);
 		startService(intent);
-		
-		final String screenoff = getResources().getString(
-				R.string.screenoff_setting);
-		boolean isScreenOff = getSharedPreferences(AppManager.CLEAN_METHOD,
-				MODE_PRIVATE).getBoolean(screenoff, false);
-		if (isScreenOff) {
-			unregisterReceiver();
-		}
-		
+		unregisterReceiver();
 	}
 
 	Handler mHandler = new Handler(Looper.getMainLooper()) {

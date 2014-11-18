@@ -138,8 +138,7 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 		FileOutputStream fos = null;
 		InputStream is = null;
 
-		file = new File(Environment.getExternalStorageDirectory(),
-				sdcardFileName);
+		file = new File(Environment.getExternalStorageDirectory(), sdcardFileName);
 
 		try {
 			is = getResources().getAssets().open("NewAppManagerPlug.apk");
@@ -151,7 +150,6 @@ public class SettingActivity extends Activity implements OnItemClickListener {
 			int byteCount = 0;
 			while ((byteCount = is.read(buffer)) != -1) {
 				fos.write(buffer, 0, byteCount);
-				;
 			}
 
 		} catch (Exception e) {

@@ -32,6 +32,7 @@ public class AppManager extends Application {
 	public static final String CLEAN_METHOD = "clean_method";
 	public static final String FLOAT_X = "floatview_x";
 	public static final String FLOAT_Y = "floatview_y";
+	public static final String TARGET_PACKAGE_NAME = "com.peter.managerplug";
 	
 	@Override
 	public void onCreate() {
@@ -59,7 +60,7 @@ public class AppManager extends Application {
 			for(ApplicationInfo applicationInfo: infos) {
 				if(applicationInfo != null && !isSystemApp(applicationInfo) 
 						&& !applicationInfo.packageName.equals(topPackage)
-						&& !applicationInfo.packageName.equals(MyService.TARGET_PACKAGE_NAME)) {
+						&& !applicationInfo.packageName.equals(TARGET_PACKAGE_NAME)) {
 					AppInfo info = new AppInfo();
 					info.packageName = applicationInfo.packageName;
 					BitmapDrawable bitmapDrawable = (BitmapDrawable) applicationInfo.loadIcon(pm);
@@ -105,16 +106,12 @@ public class AppManager extends Application {
 				return true;
 			}
 			
-//			if(info.metaData != null) {
-//				 String msg = info.metaData.getString("appType");
-			
 		    try {
 				ApplicationInfo appInfo = pm.getApplicationInfo(info.packageName, PackageManager.GET_META_DATA);
 				Log.i("packageName", info.packageName +" metaData = " + appInfo.metaData);
 			} catch (NameNotFoundException e) {
 				e.printStackTrace();
 			}
-//			}
 		}
 		return false;
     }

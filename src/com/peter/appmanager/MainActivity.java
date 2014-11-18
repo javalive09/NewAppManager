@@ -3,7 +3,6 @@ package com.peter.appmanager;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 import com.peter.appmanager.R;
@@ -12,9 +11,7 @@ import com.peter.appmanager.AppAdapter.ViewCache;
 import com.peter.appmanager.MyService.MyBinder;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,7 +22,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Process;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -98,6 +98,14 @@ public class MainActivity extends Activity implements OnItemClickListener, OnIte
 	protected void onDestroy() {
 		unbindService(conn);
 		unregisterReceiver(forceStopReceiver);
+		new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				Process.killProcess(Process.myPid());
+			}
+		}, 1000);
+		Log.i("peter", "onDestroy");
 		super.onDestroy();
 	}
 
