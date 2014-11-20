@@ -22,12 +22,11 @@ public class MyWindowManager {
 	}
 	
 	private LayoutParams getParams(Context context) {
-		
-		LayoutParams params = new LayoutParams();
-		params.type = LayoutParams.TYPE_PHONE;
-		params.format = PixelFormat.RGBA_8888;
-		params.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
-					| LayoutParams.FLAG_NOT_FOCUSABLE;
+		LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, 
+		        WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, 
+                PixelFormat.TRANSLUCENT);
 		params.gravity = Gravity.LEFT | Gravity.TOP;
 		params.width = dip2px(context, 39);
 		params.height = dip2px(context, 39);

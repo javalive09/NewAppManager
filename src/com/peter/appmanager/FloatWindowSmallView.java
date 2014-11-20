@@ -1,7 +1,5 @@
 package com.peter.appmanager;
 
-import java.lang.reflect.Field;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -11,194 +9,156 @@ import android.widget.TextView;
 
 public class FloatWindowSmallView extends TextView {
 
-	private boolean performClick;
+    private boolean performClick;
 
-	private int statusBarHeight;
+    private WindowManager.LayoutParams mParams;
+    
+    private WindowManager mWindowManager;
 
-	private WindowManager.LayoutParams mParams;
+    private int mPercent;
 
-	private int mPercent;
-	
-	public boolean mAnim = false;
-	
-	private int mTouchSlop;
-	
-	/**
-	 * 记录手指按下时在小悬浮窗的View上的横坐标的值
-	 */
-	private int xInView;
+    public boolean mAnim = false;
 
-	/**
-	 * 记录手指按下时在小悬浮窗的View上的纵坐标的值
-	 */
-	private int yInView;
-	
-	public FloatWindowSmallView(final Context context) {
-		super(context);
-		setBackgroundResource(R.drawable.float_bg);
-		initStatusBarHeight();
-		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-	}
+    private int mTouchSlop;
 
-	public void setTextPercent(int percent) {
-		mPercent = percent;
-		setText(percent + "%");
-	}
-	
-	public void startAnim(final int upLimit, final int msec) {
-		mAnim = true;
-		setEnabled(false);
-		subTractPercent(upLimit, msec);
-	}
-	
-	public void subTractPercent(final int upLimit, final int msec) {
-		if(mPercent > 0 ) {
-			postDelayed(new Runnable(){
+    private int mStartX;
 
-				@Override
-				public void run() {
-					mPercent--;
-					setTextPercent(mPercent);
-					int time = 0;
-					if(msec > 0) {
-						time = msec -1;
-					}
-					subTractPercent(upLimit, time);
-				}
-				
-			}, msec);
-		}else if(mPercent == 0) {
-			plusPercent(upLimit, 1);
-		}
-	}
-	
-	private void plusPercent(final int uplimit, final int msec) {
-		if(mPercent < uplimit) {
-			postDelayed(new Runnable(){
+    private int mStartY;
 
-				@Override
-				public void run() {
-					mPercent++;
-					int time = 100;
-					if(msec < 100) {
-						time = msec + 1;
-					}
-					setTextPercent(mPercent);
-					plusPercent(uplimit, time);
-				}
-				
-			}, msec);
-		}else{
-			mAnim = false;
-			setEnabled(true);
-		}
-	}
-	
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-
-		final int x = (int) event.getX();
-		final int y = (int) event.getY();
-		
-		switch (event.getAction()) {
-		case MotionEvent.ACTION_DOWN:
-			performClick = true;
-			xInView = x;
-			yInView = y;
-
-			break;
-		case MotionEvent.ACTION_MOVE:
-			
-			Log.i("peter", "move-------x= "+ x +", y= " + y);
-			
-			if(performClick) {
-				int deltaX = Math.abs(x - xInView);
-				int deltaY = Math.abs(y - yInView);
-				if(deltaX > mTouchSlop || deltaY > mTouchSlop) {
-					performClick = false;
-				}
-			}else {
-				float screenX = event.getRawX();
-				float screenY = event.getRawY() - statusBarHeight;
-				Log.i("peter", "move-------" + y);
-				updateViewPosition(screenX, screenY);
-				return true;
-			}
-			
-			break;
-		case MotionEvent.ACTION_UP:
-			savePosition();
-			performClick();
-			break;
-			
-		case MotionEvent.ACTION_CANCEL:
-			Log.i("peter", " MotionEvent.ACTION_CANCEL");
-			break;
-		case MotionEvent.ACTION_OUTSIDE:
-			Log.i("peter", " MotionEvent.ACTION_OUTSIDE");
-			break;
-			
-		}
-
-		return super.onTouchEvent(event);
-	}
-	
-    public boolean performClick() {
-    	if(performClick) {
-    		return super.performClick();
-    	}
-    	return false;
+    public FloatWindowSmallView(final Context context) {
+        super(context);
+        setBackgroundResource(R.drawable.float_bg);
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mWindowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
     }
-	
-	private void savePosition() {
-		getContext().getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).edit()
-		.putInt("pos_x", mParams.x).commit();
-		getContext().getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).edit()
-		.putInt("pos_y", mParams.y).commit();
-	}
 
-	/**
-	 * 将小悬浮窗的参数传入，用于更新小悬浮窗的位置。
-	 * 
-	 * @param params
-	 *            小悬浮窗的参数
-	 */
-	public void setParams(WindowManager.LayoutParams params) {
-		mParams = params;
-	}
+    public void setTextPercent(int percent) {
+        mPercent = percent;
+        setText(percent + "%");
+    }
 
-	/**
-	 * 更新小悬浮窗在屏幕中的位置。
-	 */
-	private void updateViewPosition(float screenX, float screenY) {
-		mParams.x = (int) (screenX - xInView);
-		mParams.y = (int) (screenY - yInView);
-		
-		try {
-			WindowManager windowManager = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
-			windowManager.updateViewLayout(this, mParams);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public void startAnim(final int upLimit, final int msec) {
+        mAnim = true;
+        setEnabled(false);
+        subTractPercent(upLimit, msec);
+    }
 
-	/**
-	 * 用于获取状态栏的高度。
-	 * 
-	 * @return 返回状态栏高度的像素值。
-	 */
-	private void initStatusBarHeight() {
-		if (statusBarHeight == 0) {
-			try {
-				Class<?> c = Class.forName("com.android.internal.R$dimen");
-				Object o = c.newInstance();
-				Field field = c.getField("status_bar_height");
-				int x = (Integer) field.get(o);
-				statusBarHeight = getResources().getDimensionPixelSize(x);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    public void subTractPercent(final int upLimit, final int msec) {
+        if (mPercent > 0) {
+            postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    mPercent--;
+                    setTextPercent(mPercent);
+                    int time = 0;
+                    if (msec > 0) {
+                        time = msec - 1;
+                    }
+                    subTractPercent(upLimit, time);
+                }
+
+            }, msec);
+        } else if (mPercent == 0) {
+            plusPercent(upLimit, 1);
+        }
+    }
+
+    private void plusPercent(final int uplimit, final int msec) {
+        if (mPercent < uplimit) {
+            postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    mPercent++;
+                    int time = 100;
+                    if (msec < 100) {
+                        time = msec + 1;
+                    }
+                    setTextPercent(mPercent);
+                    plusPercent(uplimit, time);
+                }
+
+            }, msec);
+        } else {
+            mAnim = false;
+            setEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        final int x = (int) event.getRawX();
+        final int y = (int) event.getRawY();
+        switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            performClick = true;
+            mStartX = x;
+            mStartY = y;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            if (performClick) {
+                if(Math.abs(x - mStartX) > mTouchSlop 
+                        || Math.abs(y - mStartY) > mTouchSlop) {
+                    performClick = false;
+                }
+            } else {
+                mParams.x = x - mParams.width / 2;
+                mParams.y = y - mParams.height / 2;
+                mWindowManager.updateViewLayout(this, mParams);
+                return true;
+            }
+
+            break;
+        case MotionEvent.ACTION_UP:
+            savePosition();
+            return performClick();
+        case MotionEvent.ACTION_CANCEL:
+            Log.i("peter", " MotionEvent.ACTION_CANCEL");
+            break;
+        case MotionEvent.ACTION_OUTSIDE:
+            Log.i("peter", " MotionEvent.ACTION_OUTSIDE");
+            break;
+        }
+        return super.onTouchEvent(event);
+    }
+
+    public boolean performClick() {
+        if (performClick) {
+            return super.performClick();
+        }
+        return false;
+    }
+
+    private void savePosition() {
+        getContext().getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).edit().putInt("pos_x", mParams.x)
+                .commit();
+        getContext().getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).edit().putInt("pos_y", mParams.y)
+                .commit();
+    }
+
+    /**
+     * 将小悬浮窗的参数传入，用于更新小悬浮窗的位置。
+     * 
+     * @param params
+     *            小悬浮窗的参数
+     */
+    public void setParams(WindowManager.LayoutParams params) {
+        mParams = params;
+    }
+
+//    /**
+//     * 更新小悬浮窗在屏幕中的位置。
+//     */
+//    private void updateViewPosition(int screenX, int screenY) {
+//        mParams.x = screenX - mParams.width / 2;
+//        mParams.y = screenY - mParams.height / 2;
+//        try {
+//            
+//            mWindowManager.updateViewLayout(this, mParams);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 }

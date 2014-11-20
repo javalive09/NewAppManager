@@ -49,7 +49,6 @@ public class AppManager extends Application {
 		// 正在运行的进程
 		List<RunningAppProcessInfo> runningAppProcessInfos = mActivityManager.getRunningAppProcesses();
 		// 正在运行的应用
-		
 		List<AppInfo> runningApps = new ArrayList<AppInfo>(runningAppProcessInfos.size());
 		for (RunningAppProcessInfo runningAppInfo : runningAppProcessInfos) {
 			ArrayList<ApplicationInfo> infos = getAppInfo(runningAppInfo.pkgList, appList);
@@ -140,7 +139,7 @@ public class AppManager extends Application {
        try {
            Method method=o.getClass().getDeclaredMethod(MethodName,c);
            try {
-               method.invoke(o,paras);//调用o对象的方法
+               method.invoke(o,paras);//调用对象的方法
            } catch (IllegalAccessException e) {
         	   e.printStackTrace();
            } catch (IllegalArgumentException e) {
