@@ -104,7 +104,7 @@ public class FloatWindowSmallView extends TextView {
                 }
             } else {
                 mParams.x = x - mParams.width / 2;
-                mParams.y = y - mParams.height / 2;
+                mParams.y = y - mParams.height / 2 - mTouchSlop;
                 mWindowManager.updateViewLayout(this, mParams);
                 return true;
             }
