@@ -89,7 +89,7 @@ public class MyWindowManager {
 	public void removeSmallWindow(Context context) {
 		if (mFloatView != null) {
 			WindowManager mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-			mWindowManager.removeView(mFloatView);
+			mWindowManager.removeViewImmediate(mFloatView);
 			mFloatView = null;
 		}
 	}
