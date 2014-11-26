@@ -90,6 +90,8 @@ public class FloatWindowSmallView extends TextView {
     public boolean onTouchEvent(MotionEvent event) {
         final int x = (int) event.getRawX();
         final int y = (int) event.getRawY();
+        Log.i("peter", "width = " + mParams.width);
+        Log.i("peter", "height = " + mParams.height);
         switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
             performClick = true;
@@ -104,13 +106,15 @@ public class FloatWindowSmallView extends TextView {
                 }
             } else {
                 mParams.x = x - mParams.width / 2;
-                mParams.y = y - mParams.height / 2 - mTouchSlop;
+                mParams.y = y - mParams.width;
                 mWindowManager.updateViewLayout(this, mParams);
                 return true;
             }
 
             break;
         case MotionEvent.ACTION_UP:
+            Log.i("peter", "width = " + mParams.width);
+            Log.i("peter", "height = " + mParams.height);
             savePosition();
             return performClick();
         case MotionEvent.ACTION_CANCEL:
@@ -146,19 +150,5 @@ public class FloatWindowSmallView extends TextView {
     public void setParams(WindowManager.LayoutParams params) {
         mParams = params;
     }
-
-//    /**
-//     * 更新小悬浮窗在屏幕中的位置。
-//     */
-//    private void updateViewPosition(int screenX, int screenY) {
-//        mParams.x = screenX - mParams.width / 2;
-//        mParams.y = screenY - mParams.height / 2;
-//        try {
-//            
-//            mWindowManager.updateViewLayout(this, mParams);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 
 }

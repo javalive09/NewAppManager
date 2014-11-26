@@ -128,7 +128,7 @@ public class MyService extends Service {
 	public void onCreate() {
 		if(!isRollingStart) {
 			isRollingStart = true;
-			startPollingService(MyService.this, 5, MyService.class, MyService.ACTION);
+			startPollingService(MyService.this, 1, MyService.class, MyService.ACTION);
 		}
 		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
 		mHandler.sendEmptyMessageDelayed(0, 5000);
