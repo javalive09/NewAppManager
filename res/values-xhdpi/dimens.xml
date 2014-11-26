@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="float_cell">39dp</dimen>
+    <dimen name="float_txt_size">13sp</dimen>
+</resources>

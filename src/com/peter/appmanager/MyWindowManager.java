@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.AsyncTask;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -28,8 +29,9 @@ public class MyWindowManager {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, 
                 PixelFormat.TRANSLUCENT);
 		params.gravity = Gravity.LEFT | Gravity.TOP;
-		params.width = dip2px(context, 39);
-		params.height = dip2px(context, 39);
+		int cell = context.getResources().getDimensionPixelSize(R.dimen.float_cell);
+		params.width = cell;
+		params.height = cell;
 		
 		int x = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_x", 0);
 		int y = context.getSharedPreferences(AppManager.CONFIG, Context.MODE_PRIVATE).getInt("pos_y", 0);
@@ -40,11 +42,6 @@ public class MyWindowManager {
 		return params;
 	}
 	
-	private int dip2px(Context context, float dipValue) {
-		final float scale = context.getResources().getDisplayMetrics().density;
-		return (int) (dipValue * scale + 0.5f);
-	}
-	
 	public void createSmallWindow(final Context context) {
 		WindowManager mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		
@@ -53,6 +50,8 @@ public class MyWindowManager {
 			LayoutParams params = getParams(context);
 			mFloatView.setParams(params);
 			mFloatView.setGravity(Gravity.CENTER);
+			int txtSize = context.getResources().getDimensionPixelSize(R.dimen.float_txt_size);
+			mFloatView.setTextSize(TypedValue.COMPLEX_UNIT_PX, txtSize);
 			final MyService service = (MyService) context;
 			updateUsedPercent(service.getUsedPercentValue(context));
 			
@@ -72,7 +71,7 @@ public class MyWindowManager {
 
 						@Override
 						protected void onPreExecute() {
-							mFloatView.startAnim(service.getUsedPercentValue(context) / 3 * 2 , 50);
+							mFloatView.startAnim(service.getUsedPercentValue(context) / 3 * 2 , 10);
 						}
 
 						@Override
