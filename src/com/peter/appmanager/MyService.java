@@ -33,6 +33,8 @@ public class MyService extends Service {
 	public static final String TARGET_ACTION = "com.peter.managerplug";
 	public static final String ACTION = "com.peter.appmanager";
 	private static boolean isRollingStart = false;
+	private List<String> launcherList = new ArrayList<String>();
+	private static final int HEART_BEAT = 1;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -128,7 +130,7 @@ public class MyService extends Service {
 	public void onCreate() {
 		if(!isRollingStart) {
 			isRollingStart = true;
-			startPollingService(MyService.this, 1, MyService.class, MyService.ACTION);
+			startPollingService(MyService.this, HEART_BEAT, MyService.class, MyService.ACTION);
 		}
 		Toast.makeText(this, "Manager Service onCreate()", Toast.LENGTH_SHORT).show();
 		mHandler.sendEmptyMessageDelayed(0, 5000);
@@ -191,7 +193,7 @@ public class MyService extends Service {
 			}else if(Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
 				if(!isRollingStart) {
 					isRollingStart = true;
-					startPollingService(MyService.this, 5, MyService.class, MyService.ACTION);
+					startPollingService(MyService.this, HEART_BEAT, MyService.class, MyService.ACTION);
 				}
 			}
 		}
@@ -288,16 +290,17 @@ public class MyService extends Service {
 	 * @return 返回包含所有包名的字符串列表
 	 */
 	private List<String> getHomes() {
-		List<String> names = new ArrayList<String>();
-		PackageManager packageManager = this.getPackageManager();
-		Intent intent = new Intent(Intent.ACTION_MAIN);
-		intent.addCategory(Intent.CATEGORY_HOME);
-		List<ResolveInfo> resolveInfo = packageManager.queryIntentActivities(
-				intent, PackageManager.MATCH_DEFAULT_ONLY);
-		for (ResolveInfo ri : resolveInfo) {
-			names.add(ri.activityInfo.packageName);
-		}
-		return names;
+	    if(launcherList.size() == 0) {
+    		PackageManager packageManager = this.getPackageManager();
+    		Intent intent = new Intent(Intent.ACTION_MAIN);
+    		intent.addCategory(Intent.CATEGORY_HOME);
+    		List<ResolveInfo> resolveInfo = packageManager.queryIntentActivities(
+    				intent, PackageManager.MATCH_DEFAULT_ONLY);
+    		for (ResolveInfo ri : resolveInfo) {
+    		    launcherList.add(ri.activityInfo.packageName);
+    		}
+	    }
+		return launcherList;
 	}
 
 
